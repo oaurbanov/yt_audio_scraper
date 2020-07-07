@@ -16,10 +16,12 @@ def main() :
     # get audios and subs per each youtube video link
     lang = json_dict["subs_lang"]
     json_dict["titles"] = []
+    json_dict["ids"] = []
     for link in json_dict["links"] :
         print ("----------------------------------------------------------")
-        title = download_audios_and_subs(link, lang, AUDIOS_PATH, SUBS_PATH)
+        title, video_id = download_audios_and_subs(link, lang, AUDIOS_PATH, SUBS_PATH)
         json_dict["titles"].append(title)
+        json_dict["ids"].append(video_id)
 
     # write titles to json entry
     with open(VIDEO_LINKS_JSON_PATH, mode='w', encoding='utf8') as json_file :
