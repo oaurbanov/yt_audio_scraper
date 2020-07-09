@@ -2,6 +2,7 @@ import os
 import pprint
 
 from subs_analizer import get_phrases_and_timestamps
+from audio_handler import generate_audio_dataset
 
 def check_paths_exist(paths_array) :
     for path in paths_array :
@@ -25,12 +26,13 @@ def extract_words(audio_file, subs_file, ds_path) :
         'timestamps' : [],
     }
     get_phrases_and_timestamps(subs_file, phrases_dict)
+    # ! Watchout for phrases of double line
 
     pprint.pprint(phrases_dict)
 
-    # ! Watchout for phrases of double line
-
-
-
-
     # get word audios
+    generate_audio_dataset(audio_file, phrases_dict, ds_path)
+
+
+
+

@@ -48,7 +48,7 @@ def generate_dataset(audios_path, subs_path, ds_path) :
 
 def main() :
 
-    get_audios_and_subtitles(JSON_PATH, AUDIOS_PATH, SUBS_PATH)
+    # get_audios_and_subtitles(JSON_PATH, AUDIOS_PATH, SUBS_PATH)
 
     generate_dataset(AUDIOS_PATH, SUBS_PATH, DS_PATH)
 
