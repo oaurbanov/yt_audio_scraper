@@ -1,11 +1,11 @@
-
+import os
 
 def describe_signal(signal, name="") :
     print("-------",name,"------")
-    print(type(signal))
-    print(len(signal))
-    print(max(signal))
-    print(min(signal))
+    print("type: ", type(signal))
+    print("len: ", len(signal))
+    print("max: ", max(signal))
+    print("min: ", min(signal))
     print("-------",name,"------")
 
 def get_secs(t_string):
@@ -24,3 +24,23 @@ def get_secs(t_string):
     # print(hours,",", minutes,",", secs ,",", m_secs)
     # print (secs_total)
     return secs_total
+
+def check_paths_exist(paths_array) :
+    for path in paths_array :
+        if not os.path.lexists(path) :
+            print("Path does not exist: ", path)
+            return False
+    return True
+
+
+def num_inside_limits( x, limits):
+    '''
+    evaluates if x is inside the limits(min, max)
+    :param x:
+    :param limits:
+    :return:
+    '''
+    if(x >= limits[0]) and (x <= limits[1]):
+        return True
+    else:
+        return False

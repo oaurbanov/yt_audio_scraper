@@ -7,7 +7,8 @@ Just put the youtube video links in the json array under "links" key, and $.wav$
 In order to extract each word the video should have automatic-generated subtitles.
 For better extractions, the videos should have audio with no/low noise and silence between words. 
 
-
+# TODOs: 
+- Implement some validation method: just 40% of generated audio_words are correct
 -----------
 
 Installing deps with conda:

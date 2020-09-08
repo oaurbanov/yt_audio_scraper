@@ -3,6 +3,7 @@
 import os
 import re
 
+import phrase_analyser
 
 def get_secs(t_string):
 
@@ -34,7 +35,7 @@ def is_valid_text_line(line) :
 
 
 # https://github.com/CoreyMSchafer/code_snippets/blob/master/Python-Regular-Expressions/snippets.txt
-def get_phrases_and_timestamps(subs_file, phrases_dict):
+def get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict):
 
     # get subs file as an array of lines
     with open(subs_file, mode='r') as fp:
@@ -54,7 +55,7 @@ def get_phrases_and_timestamps(subs_file, phrases_dict):
         matches_ts = pattern_timestamps_line.finditer(line)
 
         for match in matches_ts:
-            # whene I match for timestamp_info line, I check next_line and next_next_line are valid text line
+            # when I match for timestamp_info line, I check next_line and next_next_line are valid text line
             next_line = subs_lines[i+1]
             if is_valid_text_line(next_line) :
 
@@ -77,7 +78,7 @@ def get_phrases_and_timestamps(subs_file, phrases_dict):
                                 break
                     
                     # append phrase with its corresponding timestamps tuple
-                    phrases_arr.append(phrase_text)
+                    phrases_arr.append(phrase_analyser.clean_phrase(phrase_text))
                     times_arr.append(times)
 
     # appending each array per line

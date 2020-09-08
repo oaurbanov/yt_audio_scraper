@@ -36,7 +36,7 @@ def get_energy_signal(signal_in) :
     return threshold, energies
 
 
-def find_silences(signal_in, sample_rate, minimal_silence_length = MINIMAL_SILENCE_LENGTH, minimal_word_length = MINIMAL_WORD_LENGTH) :
+def find_silences(signal_in, sample_rate, minimal_silence_length = MINIMAL_SILENCE_LENGTH, minimal_word_length = MINIMAL_WORD_LENGTH, verbose=False) :
 
     # 1. Get energy signal and its threshold
     threshold, energies = get_energy_signal(signal_in)    
@@ -46,7 +46,8 @@ def find_silences(signal_in, sample_rate, minimal_silence_length = MINIMAL_SILEN
     # 2. If Silence_duration >= silence_samples : save that as boundary point
 
     silence_samples = sample_rate * minimal_silence_length*0.001
-    print("a silence contains n samples = ", silence_samples)
+    if verbose:
+        print("a silence contains n samples = ", silence_samples)
 
     silences_list = []
     for i,(index) in enumerate(index_of_segments_to_keep) :
@@ -64,7 +65,8 @@ def find_silences(signal_in, sample_rate, minimal_silence_length = MINIMAL_SILEN
     # 3. eliminating words in the middle of silences, that do not have the minimal_word_length
 
     minimal_word_samples = sample_rate * minimal_word_length*0.001
-    print("a word contains at least n samples = ", minimal_word_samples)
+    if verbose:
+        print("a word contains at least n samples = ", minimal_word_samples)
 
     for i, (silence) in enumerate(silences_list) :
         if i < len(silences_list)-2 :
