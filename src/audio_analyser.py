@@ -5,6 +5,7 @@ import librosa
 
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 from silence_analyser import find_silences, clean_signal_on_borders
 from phrase_analyser import get_temptative_cuts
@@ -94,7 +95,7 @@ def find_closer_end_silence(temptative_cut_index, silences) :
     return temptative_cut_index
 
 
-def get_words_cut_indexes_and_signal_phrase(phrase , phrase_timestamps, signal, sample_rate=SAMPLE_RATE, subs_time_adjustment=SUBS_TIME_ADJUSTMENT) :
+def get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, signal, sample_rate=SAMPLE_RATE, subs_time_adjustment=SUBS_TIME_ADJUSTMENT, verbose=1):
 
 
     # 1. Extract signal_phrase (sub_signal containing just the part of the phrase)
@@ -130,31 +131,72 @@ def get_words_cut_indexes_and_signal_phrase(phrase , phrase_timestamps, signal, 
     # plot_energy(energy_signal, threshold, silences, temptative_cut_indexes, phrase)
 
     # 3. Now with silences extracted and temptative_cut_indexes I can start to infer which audio-words worths to extract
+
+    # # 3.A. Method 1: Cut the word when its correponding temptative_cut_index is in between a silence_n
+    # #                Then, cut from silence_n[0] until silence_n-1[1]
+    # words = []
+    # cut_indexes = []
+    # silences.append((temptative_cut_indexes[-1], temptative_cut_indexes[-1])) # Small adjustment: virtual silence at the end
+    # last_silence = (0, 0)
+    # # This piece of code just have sense if there is >= number of silences than temptative_cut_indexes
+    # if len(silences) >=  len(temptative_cut_indexes)-1 :
+    #     for i, (word) in enumerate (phrase.split(" ")):
+    #         if word: # checks not empty string
+    #             # print(i,word)
+    #             last_words_len = len(words)
+    #             for silence in silences:
+    #                 if num_inside_limits(temptative_cut_indexes[i+1], silence):
+    #                     words.append(word)
+    #                     cut_indexes.append((last_silence[1], silence[0]))
+    #                     last_silence = silence
+    #             # If I did not append the current word then I need to update last_silence value
+    #             if last_words_len == len(words):
+    #                 last_silence = (0, find_closer_end_silence(temptative_cut_indexes[i+1], silences))
+
+
+    # 3.B. Method 2: move temptative_cut_index to its closer silence, then all words will be extracted
     words = []
     cut_indexes = []
+    silences.insert(0, (0,0)) # Small adjustment: virtual silence at the beginnig
     silences.append((temptative_cut_indexes[-1], temptative_cut_indexes[-1])) # Small adjustment: virtual silence at the end
     last_silence = (0, 0)
-    # This piece of code just have sense if there is >= number of silences than temptative_cut_indexes
-    if len(silences) >=  len(temptative_cut_indexes)-2 :
+    # This piece of code just have sense if len(silences) >=  len(temptative_cut_indexes) :
+    if len(silences) >=  len(temptative_cut_indexes):
+        # B.1. Find central position of each silence
+        silences_centers = []
+        for silence in silences:
+            silences_centers.append(silence[0] + math.floor((silence[1]-silence[0])/2))
+
+        # B.2. Extract correlation matrix, distance of each cut_index to each silence_center
+        h, w = len(temptative_cut_indexes), len(silences);
+        cor_matrix = [[0 for x in range(w)] for y in range(h)]
+        for i, (cut_index) in enumerate(temptative_cut_indexes):
+            for j, (silence_center) in enumerate(silences_centers):
+                cor_matrix[i][j] = abs(silence_center - cut_index)
+
+        # B.3. Extract the indexes of the closest silence per each temptative_cut_index
+        closest_silences_index_array = []
+        for i, (cut_index) in enumerate(temptative_cut_indexes):
+            row = cor_matrix[i]
+            closest_silence_index = row.index(min(row))
+            closest_silences_index_array.append(closest_silence_index)
+        csia = closest_silences_index_array
+
+        # B.4. Append the words and its corresponding cut_indexes based on the csia
         for i, (word) in enumerate (phrase.split(" ")):
             if word: # checks not empty string
-                # print(i,word)
-                last_words_len = len(words)
-                for silence in silences:
-                    if num_inside_limits(temptative_cut_indexes[i+1], silence):
-                        words.append(word)
-                        cut_indexes.append((last_silence[1], silence[0]))
-                        last_silence = silence
-                # If I did not append the current word then I need to update last_silence value
-                if last_words_len == len(words):
-                    last_silence = (0, find_closer_end_silence(temptative_cut_indexes[i+1], silences))
+                # The closest silence could be repeated for 2 consecutive cut_indexes
+                # In that case I don't extract any audio_words
+                if csia[i+1] > csia[i]:
+                    words.append(word)
+                    cut_indexes.append((silences[csia[i]][1], silences[csia[i+1]][0]))
 
-    print("\nget_words_and_cut_indexes results: ---------")
-    print("phrase: ", phrase)
-    print("words: ", words)
-    print("cut_indexes: ", cut_indexes)
-    print("------------------------------------\n")
-
+    if verbose:
+        print("\nget_words_and_cut_indexes results: ---------")
+        print("phrase: ", phrase)
+        print("words: ", words)
+        print("cut_indexes: ", cut_indexes)
+        print("------------------------------------\n")
 
     return words, cut_indexes, signal_phrase
 

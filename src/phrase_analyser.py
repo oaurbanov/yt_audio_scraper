@@ -1,5 +1,5 @@
 def clean_phrase(phrase):
-    chars_to_replace = ["¡", "!", "\"", "#", "$", "%", "&", "(", ")", "*", "+", ",", ".", ";", ":", "?", "¿"]
+    chars_to_replace = ["¡", "!", "\"", "#", "$", "%", "&", "(", ")", "*", "+", ",", ".", ";", ":", "?", "¿","\n","\r"]
     for char in chars_to_replace:
         phrase = phrase.replace(char, " ")
     phrase = phrase.replace("  ", " ")

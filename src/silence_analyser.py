@@ -1,5 +1,7 @@
 import numpy as np
 
+import utils
+
 # 0: 10, 0.7, 70
 # 1: 50, 0.5, 100
 #16: 50, 0.4, 70 ----- Best
@@ -79,17 +81,32 @@ def find_silences(signal_in, sample_rate, minimal_silence_length = MINIMAL_SILEN
 
     return energies, threshold, silences_list
 
-def clean_signal_on_borders(silences, signal_phrase, energy_signal) :
+def clean_signal_on_borders(silences, signal_phrase, energy_signal, verbose=0) :
     '''
     If first silence and last silence are at begining of signal and/or at the end, respectively
     I can short the signal, and should also readjust indexes of silences and resize energy_signal
     '''
+
+    if verbose :
+        print('\nSilences: ', silences)
+        utils.describe_signal(signal_phrase, 'signal_phrase')
+        utils.describe_signal(energy_signal, 'energy_signal')
+
+    # If there is no silences at the borders to cut
+    if len(silences) == 0:
+        return silences, signal_phrase, energy_signal
 
     index_end = len(signal_phrase)-1
     if silences[-1][1] == len(signal_phrase)-1 :
         index_end = silences[-1][0]
         silences.pop(-1)
         signal_phrase = signal_phrase[:index_end]
+
+    # If there was just one silence and I just pop it
+    if len(silences) == 0:
+        # I also adjust the energy signal
+        energy_signal = energy_signal[: index_end]
+        return silences, signal_phrase, energy_signal
 
     index_start = 0
     if silences[0][0] == 0 :
@@ -98,7 +115,7 @@ def clean_signal_on_borders(silences, signal_phrase, energy_signal) :
         signal_phrase = signal_phrase[index_start:]
         # as signal changes I need to readjust also indexes of the silences
         new_silences = []
-        for silence in silences :
+        for silence in silences:
             silence_start = silence[0] - index_start
             silence_end = silence[1] - index_start
             new_silences.append((silence_start, silence_end))
