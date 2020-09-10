@@ -30,7 +30,7 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path) :
         'phrases' : [],
         'timestamps' : [],
     }
-    get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict)
+    time_offset = get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict)
     # ! Watchout for phrases of double line
     pprint.pprint(phrases_dict)
 
@@ -42,9 +42,10 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path) :
     #    Then it generates the audio files for each word
 
     for i, (phrase) in enumerate(phrases_dict['phrases']):
-        phrase_timestamps = phrases_dict['timestamps'][i]
-        print("\n-------------------------------------")
-        print(phrase , phrase_timestamps)
-        print("------------------------------------\n")
-        words, cut_indexes, signal_phrase = get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, audio_signal)
-        generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path)
+        if i == i:  # Fix here the phrase index I want to analyse
+            phrase_timestamps = phrases_dict['timestamps'][i]
+            print("\n-------------------------------------")
+            print(phrase, phrase_timestamps, " time_offset: ", time_offset)
+            print("------------------------------------\n")
+            words, cut_indexes, signal_phrase = get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, time_offset, audio_signal)
+            generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path)

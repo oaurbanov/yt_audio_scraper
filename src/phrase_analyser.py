@@ -4,10 +4,13 @@ def clean_phrase(phrase):
         phrase = phrase.replace(char, " ")
     phrase = phrase.replace("  ", " ")
     phrase = phrase.replace("  ", " ")
-    if phrase[-1] == " ":
-        phrase = phrase[0:-1]
-    if phrase[-1] == "\n":
-        phrase = phrase[0:-1]
+    phrase = phrase.replace("  ", " ")
+
+    try:
+        if phrase[-1] == " ":
+            phrase = phrase[:-1]
+    except IndexError:
+        print("EXCEPTION CATCHED: index out of range while clean_phrase")
 
     return phrase.lower()
 

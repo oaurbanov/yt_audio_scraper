@@ -28,7 +28,7 @@ def get_time_diff(t1, t2):
 
 def is_valid_text_line(line) :
 
-    if line != "\n" and line != " \n" and not ("<c>" in line and "</c>" in line) :
+    if line != "\n" and line != " \n" and not ("<c>" in line and "</c>" in line):
         return True
     
     return False
@@ -49,6 +49,7 @@ def get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict):
 
     phrases_arr = []
     times_arr = []
+    time_offset = ('00:00:00.000', '00:00:00.000')
     for i, (line) in enumerate (subs_lines) :
 
         # I first match timestamp_info "00:00:00.440 --> 00:00:02.140"
@@ -57,7 +58,7 @@ def get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict):
         for match in matches_ts:
             # when I match for timestamp_info line, I check next_line and next_next_line are valid text line
             next_line = subs_lines[i+1]
-            if is_valid_text_line(next_line) :
+            if is_valid_text_line(next_line):
 
                 tb = match.group('time_begin')
                 te = match.group('time_end')
@@ -81,6 +82,17 @@ def get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict):
                     phrases_arr.append(phrase_analyser.clean_phrase(phrase_text))
                     times_arr.append(times)
 
+            # First match should have the offset times of the subs, if there is one
+            elif i <= 7 and not phrase_analyser.clean_phrase(next_line):
+
+                tb = match.group('time_begin')  # positive offset
+                te = match.group('time_end')  # negative offset
+                time_offset = (tb, te)
+
+
     # appending each array per line
     phrases_dict['phrases'] = phrases_arr
     phrases_dict['timestamps'] = times_arr
+
+    return time_offset
+
