@@ -2,6 +2,7 @@
 audios/
 subs/
 dataSets/
+firstDataSetBkp/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

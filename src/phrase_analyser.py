@@ -1,5 +1,5 @@
 def clean_phrase(phrase):
-    chars_to_replace = ["¡", "!", "\"", "#", "$", "%", "&", "(", ")", "*", "+", ",", ".", ";", ":", "?", "¿","\n","\r"]
+    chars_to_replace = ["¡", "!", "\"", "#", "$", "%", "&", "(", ")", "*", "+", ",", ".", ";", ":", "?", "¿", "\n", "\r"]
     for char in chars_to_replace:
         phrase = phrase.replace(char, " ")
     phrase = phrase.replace("  ", " ")
@@ -10,14 +10,14 @@ def clean_phrase(phrase):
         if phrase[-1] == " ":
             phrase = phrase[:-1]
     except IndexError:
-        print("EXCEPTION CATCHED: index out of range while clean_phrase")
+        print("EXCEPTION CATCH: index out of range while clean_phrase")
 
     return phrase.lower()
 
 def get_temptative_cuts(phrase, signal_phrase) :
-    '''
+    """
     extract temptative cut indexes regarding size of each word in the phrase
-    '''
+    """
 
     # I first clean the phrase
     phrase = clean_phrase(phrase)
@@ -28,11 +28,11 @@ def get_temptative_cuts(phrase, signal_phrase) :
         total_len += len(word)
     temptative_cuts = [0]
     current_cut = 0
-    for word in phrase.split(" ") :
+    for word in phrase.split(" "):
         current_cut += round((len(word)/total_len) * (len(signal_phrase)))
-        if current_cut >= len(signal_phrase) :
-            current_cut = len(signal_phrase) -1
-        temptative_cuts.append( current_cut )
+        if current_cut >= len(signal_phrase):
+            current_cut = len(signal_phrase) - 1
+        temptative_cuts.append( current_cut)
         # print("word: ", word)
         # print("current_cut: ", current_cut)
 
