@@ -22,4 +22,21 @@ Installing deps with conda:
 
 ```
 conda install --name audio_env -c conda-forge youtube-dl
+conda install --name audio_env -c conda-forge SpeechRecognition
+conda install --name audio_env -c conda-forge google-cloud-texttospeech
+
+conda install --name audio_env -c conda-forge google-cloud-sdk
+conda install --name audio_env -c conda-forge google-api-python-client
+---------------------
+
+# Creating new env with python3.7
+
+conda create --name audio_py37 python=3.7
+conda activate audio_py37
+conda install --name audio_env -c orc0 google-cloud-speech
+
+conda install --name audio_py37 -c conda-forge youtube-dl
+
 ```
+
+
