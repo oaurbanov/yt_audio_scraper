@@ -1,56 +1,74 @@
+#!/usr/bin/env python
 
-
-# samples per second
-SAMPLE_RATE = 22050
-
-AUDIO_PATH_IN = "../../dataSets/conversation/0.wav"
-AUDIO_PATH_OUT = "../../dataSets/conversation/B_0.wav"
-
-from pydub import AudioSegment
-sound = AudioSegment.from_file(AUDIO_PATH_IN)
-
-print("----------Before Conversion--------")
-print("Frame Rate", sound.frame_rate)
-print("Channel", sound.channels)
-print("Sample Width",sound.sample_width)
-
-# Change Frame Rate
-sound = sound.set_frame_rate(SAMPLE_RATE)
-
-# Change Channel
-sound = sound.set_channels(1)
-
-# Change Sample Width
-
-# 1 : “8 bit Signed Integer PCM”,
-# 2 : “16 bit Signed Integer PCM”,
-# 3 : “32 bit Signed Integer PCM”,
-# 4 : “64 bit Signed Integer PCM”
-
-sound = sound.set_sample_width(3)
-
-# Export the Audio to get the changed content
-sound.export(AUDIO_PATH_OUT, format ="wav")
-
-
-
-
-# import librosa
-# output_istft, sr = librosa.load(AUDIO_PATH_IN, SAMPLE_RATE)
-# import pysndfile
-# pysndfile.sndio.write(AUDIO_PATH_OUT, output_istft, rate=SAMPLE_RATE, format='wav', enc='pcm16')
+# Copyright 2017 Google Inc. All Rights Reserved.
 #
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-import speech_recognition as sr
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-print(sr.__version__)
+"""Google Cloud Speech API sample application using the REST API for batch
+processing.
+Example usage:
+    python transcribe.py resources/audio.raw
+    python transcribe.py gs://cloud-samples-tests/speech/brooklyn.flac
+"""
 
-r = sr.Recognizer()
+# import argparse
 
+AUDIO_PATH = "../../dataSets/conversation/0.wav"
 
-harvard = sr.AudioFile(AUDIO_PATH_OUT)
-with harvard as source:
-    audio = r.record(source)
-    o = r.recognize_google(audio, language='fr-FR')
+# [START speech_transcribe_sync]
+def transcribe_file(speech_file):
+    """Transcribe the given audio file."""
+    from google.cloud import speech
+    from google.cloud.speech import enums
+    from google.cloud.speech import types
+    import io
+    client = speech.SpeechClient()
 
-print(o)
+    # [START speech_python_migration_sync_request]
+    # [START speech_python_migration_config]
+    with io.open(speech_file, 'rb') as audio_file:
+        content = audio_file.read()
+
+    audio = types.RecognitionAudio(content=content)
+    config = types.RecognitionConfig(
+        encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
+        sample_rate_hertz=16000,
+        language_code='en-US')
+    # [END speech_python_migration_config]
+
+    # [START speech_python_migration_sync_response]
+    response = client.recognize(config, audio)
+    # [END speech_python_migration_sync_request]
+    # Each result is for a consecutive portion of the audio. Iterate through
+    # them to get the transcripts for the entire audio file.
+    for result in response.results:
+        # The first alternative is the most likely one for this portion.
+        print(u'Transcript: {}'.format(result.alternatives[0].transcript))
+    # [END speech_python_migration_sync_response]
+# [END speech_transcribe_sync]
+
+if __name__ == '__main__':
+
+    transcribe_file(AUDIO_PATH)
+
+    # parser = argparse.ArgumentParser(
+    #     description=__doc__,
+    #     formatter_class=argparse.RawDescriptionHelpFormatter)
+    # parser.add_argument(
+    #     'path', help='File or GCS path for audio file to be recognized')
+    # args = parser.parse_args()
+    # # if args.path.startswith('gs://'):
+    # #     transcribe_gcs(args.path)
+    # # else:
+    # #     transcribe_file(args.path)
+    # transcribe_file(args.path)
