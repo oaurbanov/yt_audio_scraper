@@ -52,8 +52,9 @@ def generate_dataset(audios_path, subs_path, ds_path, lang):
     and using the sub files, It extracts the audios corresponding to each word (audio_word)
     Each audio_word is then put in the ds_path
     :param audios_path: dir with the audio_files one per each video_link
-    :param subs_path: dir with the sub_files one per each video_link
+    :param subs_path: dir with the subtitle_files one per each video_link
     :param ds_path: directory where the generated audio_words are put
+    :param lang: language of the subtitles
     """
 
     print("\n-----------------------------generate_dataset-----------------------------BEGIN")
