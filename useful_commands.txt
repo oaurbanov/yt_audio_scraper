@@ -1,0 +1,44 @@
+### Dependencies and environment:
+---------------------------------------------------------------------
+conda create --name scraper37 python=3.7
+conda activate scraper37
+
+# scraper
+conda install -c conda-forge youtube-dl
+conda install -c conda-forge librosa
+
+# validator
+conda install -c conda-forge SpeechRecognition
+
+# tests
+conda install -c anaconda pytest
+---------------------------------------------------------------------
+
+
+### Useful:
+---------------------------------------------------------------------
+# List environments and remove one
+conda env list
+conda env remove --name NAME_ENV
+
+# Create environment with python3.7 and activate it
+conda create --name audio_py37 python=3.7
+conda activate audio_py37
+
+# List packs in the current environment
+conda list
+
+# Install, update and remove pack in current environment
+conda install -c conda-forge pydub
+conda update pydub
+conda remove pydub
+
+# Save the dependencies to replicate environment with conda
+conda list --explicit > requirements.txt
+---------------------------------------------------------------------
+
+
+### Refs:
+---------------------------------------------------------------------
+- https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf
+---------------------------------------------------------------------

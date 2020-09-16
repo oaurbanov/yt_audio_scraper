@@ -1,4 +1,4 @@
-# Dictionary project
+# Dictionary
 
 It extracts a frequency-ordered dictionary(in json), of most used words in a language
 

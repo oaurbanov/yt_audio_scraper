@@ -1,5 +1,3 @@
-from pydub import AudioSegment
-from scipy.io import wavfile
 import os
 import librosa
 

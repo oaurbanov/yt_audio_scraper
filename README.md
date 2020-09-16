@@ -7,30 +7,38 @@ Just put the video links (tested with youtube videos) in the json array under "l
 In order to extract each word the video should have automatic-generated subtitles.
 For better extractions, the videos should have audio with low noise and silence (70 ms) between words. 
 
-## TODOs: 
-- Extract dependencies per projects and clean READMEs
+## Pack tree
+```
+
+├── audioscraper   --> package
+│   ├── scraper    --> extracts the audio_words, generates the DataSet
+│   ├── validator  --> validates and cleans extracted audo_words in DataSet
+│   └── controller --> handles the other packs for a standalone operation in a server
+│
+├── resources
+│   └── dictionary
+│       └── FR    --> withe list of french audio words to extract
+│
+└── tests
+    ├── context.py
+    ├── test_audio_analyser.py
+    ├── test_scraper.py
+    ├── test_validator.py
+    └── resources          --> resources for the tests
+        └── scraper
+            ├── dataSets   --> generated dataSet with test_scraper.py
+            │   ├── one
+            │   ├── two
+            │   └── three
+            ├── downloads
+            │   ├── audios
+            │   └── subs
+            └── video_links.json  --> contains links of videos to scrape
+
+```
+
+## TODOs:
+
 - When storing audio_words, check current video has not been stored yet, save audio_words in having into account the video ID
 - Get List of videos to extract from a link_playlist, it would more useful than the json
-
-## Deps:
-```
-# List enviroments and remove one
-conda env list
-conda env remove --name NAME_ENV
-
-# Create enviroment with python3.7 and activate it
-conda create --name audio_py37 python=3.7
-conda activate audio_py37
-
-# List packs in the current enviroment
-conda list
-
-# Install, update and remove pack in current enviroment
-conda install -c conda-forge pydub
-conda update pydub
-conda remove pydub
-```
-
-## Refs:
-
-- https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf
+- Fix audioscraper.validator for Google-cloud-speech

@@ -1,4 +1,4 @@
-# Validator project
+# Validator
 
 It validates with external APIs the audios_word generated are correct.
 
