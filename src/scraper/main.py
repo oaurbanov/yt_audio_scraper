@@ -4,9 +4,9 @@ import json
 from audio_subs_downloader import download_audios_and_subs
 from audio_words_generator import generate_audio_words_per_file
 
-JSON_PATH = "../../video_links.json"
-AUDIOS_PATH = "../../audios"
-SUBS_PATH = "../../subs"
+JSON_PATH = "../../resources/scraper/video_links.json"
+AUDIOS_PATH = "../../resources/scraper/downloads/audios"
+SUBS_PATH = "../../resources/scraper/downloads/subs"
 DS_PATH = "../../dataSets"
 
 

@@ -3,9 +3,9 @@ import json
 import pprint
 
 
-PDF_PATH = 'resources/freqDictFR.pdf'
-JSON_OUTPUT = 'dicts/FR/most_common_5000.json'
-JSON_OUTPUT_BY_LISTS = 'dicts/FR/common_by_lists.json'
+PDF_PATH = '../../resources/dictionary/freqDictFR.pdf'
+JSON_OUTPUT = '../../resources/dictionary/FR/most_common_5000.json'
+JSON_OUTPUT_BY_LISTS = '../../resources/dictionary/FR/common_by_lists.json'
 
 
 def is_number(s):

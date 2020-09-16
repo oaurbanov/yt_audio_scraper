@@ -1,6 +1,6 @@
 # data folders
-audios/
-subs/
+resources/scraper/downloads/audios/
+resources/scraper/downloads/subs/
 dataSets/
 firstDataSetBkp/
 
