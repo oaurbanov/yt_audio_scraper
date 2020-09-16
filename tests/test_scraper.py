@@ -3,10 +3,10 @@ import json
 
 from context import audioscraper
 
-JSON_PATH = "../resources/scraper/video_links.json"
-AUDIOS_PATH = "../resources/scraper/downloads/audios"
-SUBS_PATH = "../resources/scraper/downloads/subs"
-DS_PATH = "../dataSets"
+JSON_PATH = "./resources/scraper/video_links.json"
+AUDIOS_PATH = "./resources/scraper/downloads/audios"
+SUBS_PATH = "./resources/scraper/downloads/subs"
+DS_PATH = "./resources/scraper/dataSets"
 
 
 def get_audios_and_subtitles(json_path, audios_path, subs_path):

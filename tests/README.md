@@ -2,6 +2,7 @@
 
 ```
 > py.test test_audio_analyser.py
+> py.test test_audio_analyser.py -v -s
 
 # test_scraper is not automated
 > python test_scraper.py
@@ -37,11 +38,12 @@ conda activate scraper37
 
 conda install -c conda-forge youtube-dl
 conda install -c conda-forge librosa
-
-conda install -c anaconda pytest
-
 conda install -c conda-forge pydub
 conda install -c anaconda scipy
+
+conda install -c conda-forge SpeechRecognition
+
+conda install -c anaconda pytest
 ```
 
 ## Refs:

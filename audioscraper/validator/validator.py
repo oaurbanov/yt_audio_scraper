@@ -6,7 +6,7 @@ import speech_recognition as sr
 import json
 
 
-def recognize(audio_path_in, google_api_cred_path, api_number=1, lang='fr-FR'):
+def recognize(audio_path_in, google_api_cred_path="", api_number=1, lang='fr-FR'):
     """
     using external APIs, it recognices the audio in the file
     :param audio_path_in:
@@ -46,33 +46,33 @@ def recognize(audio_path_in, google_api_cred_path, api_number=1, lang='fr-FR'):
 
 
 
-def convertRawWav2PCMwav(audio_in, audio_out, frame_rate=SAMPLE_RATE, sample_width=2, verbose=0):
-    """
-    Convert raw wav audio chunks, into PCM codified wav audio
-    :param audio_in: path audio input
-    :param audio_out: path audio output
-    :param frame_rate: encoding frame_rate
-    :param sample_width:
-                    1 : “8 bit Signed Integer PCM”,
-                    2 : “16 bit Signed Integer PCM”,
-                    3 : “32 bit Signed Integer PCM”,
-                    4 : “64 bit Signed Integer PCM”
-    :param verbose:
-    """
-
-    sound = AudioSegment.from_file(audio_in)
-
-    if verbose:
-        print("----------Before Conversion--------")
-        print("Frame Rate", sound.frame_rate)
-        print("Channel", sound.channels)
-        print("Sample Width", sound.sample_width)
-
-    # Change Frame Rate
-    sound = sound.set_frame_rate(SAMPLE_RATE)
-    # Change Channel
-    sound = sound.set_channels(1)
-    # Change Sample Width
-    sound = sound.set_sample_width(sample_width)
-    # Export the Audio to get the changed content
-    sound.export(audio_out, format="wav")
+# def convertRawWav2PCMwav(audio_in, audio_out, frame_rate=SAMPLE_RATE, sample_width=2, verbose=0):
+#     """
+#     Convert raw wav audio chunks, into PCM codified wav audio
+#     :param audio_in: path audio input
+#     :param audio_out: path audio output
+#     :param frame_rate: encoding frame_rate
+#     :param sample_width:
+#                     1 : “8 bit Signed Integer PCM”,
+#                     2 : “16 bit Signed Integer PCM”,
+#                     3 : “32 bit Signed Integer PCM”,
+#                     4 : “64 bit Signed Integer PCM”
+#     :param verbose:
+#     """
+#
+#     sound = AudioSegment.from_file(audio_in)
+#
+#     if verbose:
+#         print("----------Before Conversion--------")
+#         print("Frame Rate", sound.frame_rate)
+#         print("Channel", sound.channels)
+#         print("Sample Width", sound.sample_width)
+#
+#     # Change Frame Rate
+#     sound = sound.set_frame_rate(SAMPLE_RATE)
+#     # Change Channel
+#     sound = sound.set_channels(1)
+#     # Change Sample Width
+#     sound = sound.set_sample_width(sample_width)
+#     # Export the Audio to get the changed content
+#     sound.export(audio_out, format="wav")
