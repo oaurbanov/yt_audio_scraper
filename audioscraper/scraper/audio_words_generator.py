@@ -1,6 +1,6 @@
-from subs_analyser import get_phrases_and_timestamps_from_vtt
-from audio_analyser import *
-from utils import *
+from .subs_analyser import get_phrases_and_timestamps_from_vtt
+from .audio_analyser import *
+from .utils import *
 
 
 def generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path):

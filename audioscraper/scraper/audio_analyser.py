@@ -3,27 +3,29 @@ from scipy.io import wavfile
 import os
 import librosa
 
+import numpy as np
+import soundfile as sf
+
 import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-from silence_analyser import find_silences, clean_signal_on_borders
-from phrase_analyser import get_temptative_cuts
-from utils import *
-
+from .silence_analyser import find_silences, clean_signal_on_borders
+from .phrase_analyser import get_temptative_cuts
+from .utils import *
 
 # samples per second
 SAMPLE_RATE = 22050
 
 # Time that subs can be offset from actual audio
-SUBS_TIME_ADJUSTMENT = 100 # miliseconds
+SUBS_TIME_ADJUSTMENT = 100  # miliseconds
 
 
 def plot_energy(energy_signal, threshold, silences, temptative_cut_indexes, title):
     print("threshold: ", threshold)
     describe_signal(energy_signal, "energy_signal")
     plt.title(title)
-    plt.plot(np.arange(0,len(energy_signal),1), energy_signal)
+    plt.plot(np.arange(0, len(energy_signal), 1), energy_signal)
     plt.axhline(y=threshold, color='green', linestyle='--')
     for xc in temptative_cut_indexes:
         plt.axvline(x=xc, color='black', linestyle='--')
@@ -35,7 +37,7 @@ def plot_energy(energy_signal, threshold, silences, temptative_cut_indexes, titl
 
 def plot_signal(signal_phrase, silences, temptative_cut_indexes, title):
     plt.title(title)
-    plt.plot(np.arange(0,len(signal_phrase),1), signal_phrase)
+    plt.plot(np.arange(0, len(signal_phrase), 1), signal_phrase)
     for xc in temptative_cut_indexes:
         plt.axvline(x=xc, color='black', linestyle='--')
     for silence in silences:
@@ -67,20 +69,10 @@ def load_audio_signal(audio_file, target_sample_rate=SAMPLE_RATE):
 
     print("Loading signal ")
 
-    # Method 1. Using pydub
-    # sample_rate, signal = wavfile.read(audio_file)
-    # print("sample_rate: ", sample_rate)
-    # signal_1 = signal[:,0]
-    # signal_2 = signal[:,1]
-    # signal_mono = (signal[:,0]/2) + (signal[:,1]/2)
-    # # describe_signal(signal_1)
-    # # describe_signal(signal_2)
-    # describe_signal(signal_mono)
-    # # # down-sampling / up-sampling
-    # # samples_to_keep = target_sample_rate/sample_rate # 22050 / 44100  = 0.5
-
-    # Method 2. Using Librosa
+    # I use librosa since it sets a target_sample_rate
     y, sr = librosa.load(audio_file, target_sample_rate)
+    # y, sr = sf.read(audio_file)
+
     print("Sample rate: ", sr)
     describe_signal(y, "Loaded wav signal")
 
@@ -92,9 +84,16 @@ def store_audio_file(signal, name, ds_path):
     word_folder_path = os.path.join(ds_path, name)
     if not os.path.lexists(word_folder_path):
         os.mkdir(word_folder_path)
-    for dirpath, dirnames, filenames in os.walk(word_folder_path):
-        index = len(filenames)
-        librosa.output.write_wav(os.path.join(word_folder_path, str(index)+".wav"), signal, SAMPLE_RATE)
+
+    try:
+        for dirpath, dirnames, filenames in os.walk(word_folder_path):
+            index = len(filenames)
+            sf.write(os.path.join(word_folder_path, str(index) + ".wav"), signal, SAMPLE_RATE,
+                     'PCM_16')
+    except:
+        return False
+
+    return True
 
 
 # def find_closer_end_silence(temptative_cut_index, silences):
@@ -107,7 +106,6 @@ def store_audio_file(signal, name, ds_path):
 
 def get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, time_offset, signal, sample_rate=SAMPLE_RATE,
                                             subs_time_adjustment=SUBS_TIME_ADJUSTMENT, verbose=1):
-
     # 0. Put the offset, set generally in the 5th line of the .vtt subs file:
     # 00:00:01.399 --> 00:00:04.999 align:start position:0%
 
@@ -117,18 +115,18 @@ def get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, time_offs
     index_offset = round(t_offset * sample_rate)
 
     # 1. Extract signal_phrase (sub_signal containing just the part of the phrase)
-    t1 = round(get_secs(phrase_timestamps[0]) - subs_time_adjustment*0.001, 2)
-    t2 = round(get_secs(phrase_timestamps[1]) + subs_time_adjustment*0.001, 2)
+    t1 = round(get_secs(phrase_timestamps[0]) - subs_time_adjustment * 0.001, 2)
+    t2 = round(get_secs(phrase_timestamps[1]) + subs_time_adjustment * 0.001, 2)
 
     index_1 = round(t1 * sample_rate) + index_offset
-    index_2 = round(t2 * sample_rate) + index_offset # (t2 +to_1) added to fit video ID: WofKLzddask
-    
+    index_2 = round(t2 * sample_rate) + index_offset  # (t2 +to_1) added to fit video ID: WofKLzddask
+
     # check index consistency
     if index_1 < 0:
         index_1 = 0
     if index_2 < 0:
         index_2 = 0
-    if index_2 > len(signal)-1:
+    if index_2 > len(signal) - 1:
         index_2 = len(signal) - 1
     if index_1 >= index_2:
         print("ERROR: time_ini is greater that time_end: ", phrase_timestamps)
@@ -178,14 +176,15 @@ def get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, time_offs
     # 3.B. Method 2: Move temptative_cut_index to its closer silence, then all words will be extracted
     words = []
     cut_indexes = []
-    silences.insert(0, (0,0)) # Small adjustment: virtual silence at the beginnig
-    silences.append((temptative_cut_indexes[-1], temptative_cut_indexes[-1]))  # Small adjustment: virtual silence at the end
+    silences.insert(0, (0, 0))  # Small adjustment: virtual silence at the beginnig
+    silences.append(
+        (temptative_cut_indexes[-1], temptative_cut_indexes[-1]))  # Small adjustment: virtual silence at the end
     # This piece of code just have sense if len(silences) >=  len(temptative_cut_indexes) :
-    if len(silences) >= len(temptative_cut_indexes)*0.666:  # Small adjustment: 1/3 of words are pronounced together
+    if len(silences) >= len(temptative_cut_indexes) * 0.666:  # Small adjustment: 1/3 of words are pronounced together
         # B.1. Find central position of each silence
         silences_centers = []
         for silence in silences:
-            silences_centers.append(silence[0] + math.floor((silence[1]-silence[0])/2))
+            silences_centers.append(silence[0] + math.floor((silence[1] - silence[0]) / 2))
 
         # B.2. Extract correlation matrix, distance of each cut_index to each silence_center
         h, w = len(temptative_cut_indexes), len(silences)
@@ -204,12 +203,12 @@ def get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, time_offs
 
         # B.4. Append the words and its corresponding cut_indexes based on the csia
         for i, (word) in enumerate(phrase.split(" ")):
-            if word: # checks not empty string
+            if word:  # checks not empty string
                 # The closest silence could be repeated for 2 consecutive cut_indexes
                 # In that case I don't extract any audio_words
-                if csia[i+1] > csia[i]:
+                if csia[i + 1] > csia[i]:
                     words.append(word)
-                    cut_indexes.append((silences[csia[i]][1], silences[csia[i+1]][0]))
+                    cut_indexes.append((silences[csia[i]][1], silences[csia[i + 1]][0]))
 
     if verbose:
         print("\nget_words_and_cut_indexes results: ---------")
@@ -222,8 +221,3 @@ def get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, time_offs
     # plot_signal_result(signal_phrase, silences, temptative_cut_indexes, cut_indexes, phrase)
 
     return words, cut_indexes, signal_phrase
-
-
-
-
-

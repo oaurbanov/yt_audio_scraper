@@ -1,6 +1,6 @@
 import numpy as np
 
-import utils
+from . import utils
 
 # 0: 10, 0.7, 70
 # 1: 50, 0.5, 100

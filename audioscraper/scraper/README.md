@@ -11,5 +11,14 @@ For better extractions, the videos should have audio with low noise and silence 
 ## Deps:
 
 ```
-conda install --name audio_env -c conda-forge youtube-dl
+conda create --name scraper37 python=3.7
+conda activate scraper37
+
+conda install -c conda-forge youtube-dl
+conda install -c conda-forge librosa
+
+conda install -c anaconda pytest
+
+conda install -c conda-forge pydub
+conda install -c anaconda scipy
 ```

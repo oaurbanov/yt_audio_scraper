@@ -3,7 +3,7 @@
 import re
 import pprint
 
-import phrase_analyser
+from . import phrase_analyser as pa
 
 
 def get_secs(t_string):
@@ -66,18 +66,18 @@ def get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict, verbose=1):
                     phrase_text = next_line
                     # we just look for the next 4 lines
                     for k in range(1, 5):
-                        if (i + 1 + k < len(subs_lines)):
+                        if i + 1 + k < len(subs_lines):
                             k_next_line = subs_lines[i + 1 + k]
                             if is_valid_text_line(k_next_line):
                                 phrase_text += k_next_line
                             else:
                                 break
                     # append phrase with its corresponding timestamps tuple
-                    phrases_arr.append(phrase_analyser.clean_phrase(phrase_text))
+                    phrases_arr.append(pa.clean_phrase(phrase_text))
                     times_arr.append(times)
 
             # First match should have the offset times of the subs, if there is one
-            elif i <= 7 and not phrase_analyser.clean_phrase(next_line):
+            elif i <= 7 and not pa.clean_phrase(next_line):
                 tb = match.group('time_begin')  # positive offset
                 te = match.group('time_end')  # negative offset
                 time_offset = (tb, te)

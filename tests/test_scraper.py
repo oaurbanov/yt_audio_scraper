@@ -1,13 +1,12 @@
 import os
 import json
 
-from audio_subs_downloader import download_audios_and_subs
-from audio_words_generator import generate_audio_words_per_file
+from context import audioscraper
 
-JSON_PATH = "../../resources/scraper/video_links.json"
-AUDIOS_PATH = "../../resources/scraper/downloads/audios"
-SUBS_PATH = "../../resources/scraper/downloads/subs"
-DS_PATH = "../../dataSets"
+JSON_PATH = "../resources/scraper/video_links.json"
+AUDIOS_PATH = "../resources/scraper/downloads/audios"
+SUBS_PATH = "../resources/scraper/downloads/subs"
+DS_PATH = "../dataSets"
 
 
 def get_audios_and_subtitles(json_path, audios_path, subs_path):
@@ -33,7 +32,7 @@ def get_audios_and_subtitles(json_path, audios_path, subs_path):
     json_dict["ids"] = []
     for link in json_dict["links"]:
         print("----------------------------------------------------------")
-        title, video_id = download_audios_and_subs(link, lang, audios_path, subs_path)
+        title, video_id = audioscraper.download_audios_and_subs(link, lang, audios_path, subs_path)
         json_dict["titles"].append(title)
         json_dict["ids"].append(video_id)
 
@@ -67,7 +66,7 @@ def generate_dataset(audios_path, subs_path, ds_path, lang):
                 print("\n----------------------------- "+id+" -----------------------------BEGIN")
                 audio_file = os.path.join(audios_path, filename)
                 subs_file = os.path.join(subs_path, id + "." + lang + ".vtt")
-                generate_audio_words_per_file(audio_file, subs_file, ds_path)
+                audioscraper.generate_audio_words_per_file(audio_file, subs_file, ds_path)
                 print("----------------------------- "+id+" -----------------------------END\n")
 
     print("-----------------------------generate_dataset-----------------------------END\n")
