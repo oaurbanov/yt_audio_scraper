@@ -32,7 +32,7 @@ def get_audios_and_subtitles(json_path, audios_path, subs_path):
     json_dict["ids"] = []
     for link in json_dict["links"]:
         print("----------------------------------------------------------")
-        title, video_id = audioscraper.download_audios_and_subs(link, lang, audios_path, subs_path)
+        title, video_id = audioscraper.old_download_audios_and_subs(link, lang, audios_path, subs_path)
         json_dict["titles"].append(title)
         json_dict["ids"].append(video_id)
 
