@@ -1,11 +1,9 @@
-import youtube_dl
 import json
 import os
 
 from . import audio_subs_downloader as asd
 from .subs_analyser import get_phrases_and_timestamps_from_vtt
-from .audio_analyser import *
-from .utils import *
+from . import audio_analyser as aa
 
 
 def get_not_yet_scraped_videos(videos_to_scrap, scraped_videos, verbose=0):
@@ -48,12 +46,15 @@ def generate_audio_words_per_link(link, lang, downloads_path, ds_path, scraped_v
         scraped_videos = json.load(json_file)
     not_yet_scraped_videos = get_not_yet_scraped_videos(videos_to_scrap, scraped_videos)
 
-    # Before start scraping I check the paths where I will put the file
     if len(not_yet_scraped_videos) == 0:
         return True  # Nothing to do
     elif len(not_yet_scraped_videos) > 0:
+        # Before start scraping I check the paths where I will put the file
         if not os.path.exists(downloads_path):
             print("ERROR: download path does not exist")
+            return False
+        if not os.path.exists(ds_path):
+            print("ERROR: dataSet path does not exist")
             return False
         audios_downloads_path = os.path.join(downloads_path, 'audios')
         subs_downloads_path = os.path.join(downloads_path, 'subs')
@@ -66,7 +67,8 @@ def generate_audio_words_per_link(link, lang, downloads_path, ds_path, scraped_v
             if video['automatic_captions_lang']:
                 wav_path, subs_path = asd.download_audios_and_subs(video['link'], lang,
                                                                    audios_downloads_path, subs_downloads_path)
-                #generate_audio_words_per_file(wav_path, subs_path, ds_path)
+                generate_audio_words_per_file(wav_path, subs_path, ds_path)
+                # TODO once audio_words are generated, remove wav and subs files
     # TODO: Don't forget to update the json in scraped_videos_path
     return True
 
@@ -74,7 +76,20 @@ def generate_audio_words_per_link(link, lang, downloads_path, ds_path, scraped_v
 def generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path):
     if len(words) == len(cut_indexes):
         for i, cut_index_tuple in enumerate(cut_indexes):
-            store_audio_file(signal_phrase[cut_index_tuple[0]:cut_index_tuple[1]], words[i], ds_path)
+            signal_word = signal_phrase[cut_index_tuple[0]:cut_index_tuple[1]]
+            word_name = words[i]
+            # TODO check if word_name is in white list
+            # Create path for word, if it does not exist
+            word_folder_path = os.path.join(ds_path, word_name)
+            if not os.path.exists(word_folder_path):
+                os.mkdir(word_folder_path)
+            # Calculate name for the audio file
+            number_of_files = len([name for name in os.listdir(word_folder_path) if os.path.isfile(name)])
+            index_prefix = format(number_of_files, "04d")
+            file_name = index_prefix + ".wav"
+            word_final_path = word_folder_path + "/" + file_name  # ds_path/word_name/0001.wav
+            aa.store_audio_file(signal_word, word_final_path, verbose=1)
+            # TODO validate generated word and keep score
 
 
 def generate_audio_words_per_file(audio_file, subs_file, ds_path):
@@ -85,9 +100,6 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path):
     :param subs_file: the subs file in .vtt format, it is organized by phrases
     :param ds_path: directory where the generated audio_words are put
     """
-    
-    if not check_paths_exist([audio_file, subs_file, ds_path]):
-        return
 
     # 1. get phrases and timestamps in a dictionary
     phrases_dict = {
@@ -97,10 +109,11 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path):
     time_offset = get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict)
 
     # 2. Loads the audio_file in the audio_signal
-    audio_signal = load_audio_signal(audio_file)
+    audio_signal = aa.load_audio_signal(audio_file)
 
     # 3. Iterates through each phrase and get the words and cut_indexes
     #    Then it generates the audio files for each word
+    print("\n\n--------------------- Extracting audio words for : ", audio_file, "-------BEGIN")
     for i, (phrase) in enumerate(phrases_dict['phrases']):
         if i == i:  # Fix here the phrase index I want to analyse
             phrase_timestamps = phrases_dict['timestamps'][i]
@@ -108,8 +121,9 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path):
                   "------------------------")
             print(phrase, phrase_timestamps, " time_offset: ", time_offset)
             print("------------------------------------")
-            words, cut_indexes, signal_phrase = get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps,
-                                                                                        time_offset, audio_signal)
+            words, cut_indexes, signal_phrase = aa.get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps,
+                                                                                           time_offset, audio_signal)
             generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path)
             print("----------------------------------------------------------------------------------------------------"
                   "----------------------")
+    print("--------------------- Extracting audio words for : ", audio_file, "-------END\n\n")

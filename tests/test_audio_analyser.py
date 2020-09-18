@@ -1,8 +1,9 @@
 import pytest
-import shutil
+import os
 import numpy as np
 
 from .context import audioscraper
+from audioscraper import audio_analyser as aa
 
 
 def describe_signal(signal, name=""):
@@ -14,19 +15,21 @@ def describe_signal(signal, name=""):
     print("-------", name, "------")
 
 
-def test_load_audio_file():
-    y = audioscraper.load_audio_signal("./resources/conversation.wav")
-    describe_signal(y, "from load_audio_signal")
-    assert len(y) > 0
-
-
 def test_store_audio_file():
-    # I use the dataSets name as it is ignored in the .git
-    try:
-        shutil.rmtree('./dataSets')
-    except:
-        print("Path does not exist yet")
-
     signal = [0.2, 0.1, 0.2, -0.3, -0.4, 0.5]  # float32 in this range(-1,+1)
     np_signal = np.array(signal, dtype='float32')
-    assert audioscraper.store_audio_file(np_signal, "dataSets", ".")
+    file_path = "./dummyAudio.wav"
+    aa.store_audio_file(np_signal, file_path)
+    assert os.path.exists(file_path)
+    os.remove(file_path)
+
+
+def test_load_audio_signal():
+    file_path = "./dummyAudio.wav"
+    signal = [0.2, 0.1, 0.2, -0.3, -0.4, 0.5]  # float32 in this range(-1,+1)
+    np_signal = np.array(signal, dtype='float32')
+    aa.store_audio_file(np_signal, file_path)
+
+    y = aa.load_audio_signal(file_path, verbose=1)
+    assert len(y) > 0
+    os.remove(file_path)

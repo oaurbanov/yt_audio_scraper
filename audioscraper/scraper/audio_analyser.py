@@ -58,39 +58,31 @@ def plot_signal_result(signal_phrase, silences, temptative_cut_indexes, cut_inde
     plt.show()
 
 
-def load_audio_signal(audio_file, target_sample_rate=SAMPLE_RATE):
+def load_audio_signal(audio_file, target_sample_rate=SAMPLE_RATE, verbose=0):
     """
     returns normalized audio signal, if stereo make it mono
     and adapt it to the sample_rate
     """
-    print("\n------------------load_audio_signal--------------BEGIN")
-
-    print("Loading signal ")
-
+    print("\n--------------------------------")
+    print("Loading audio signal ...")
     # I use librosa since it sets a target_sample_rate
     y, sr = librosa.load(audio_file, target_sample_rate)
     # y, sr = sf.read(audio_file)
-
-    print("Sample rate: ", sr)
-    describe_signal(y, "Loaded wav signal")
-
-    print("------------------load_audio_signal--------------END\n")
+    print("Audio signal loaded ")
+    if verbose:
+        print("Sample rate: ", sr)
+        describe_signal(y, "Loaded wav signal")
+    print("--------------------------------\n")
     return y
 
 
-def store_audio_file(signal, name, ds_path):
-    word_folder_path = os.path.join(ds_path, name)
-    if not os.path.lexists(word_folder_path):
-        os.mkdir(word_folder_path)
-
+def store_audio_file(signal, file_path, sample_rate=SAMPLE_RATE, verbose=0):
     try:
-        for dirpath, dirnames, filenames in os.walk(word_folder_path):
-            index = len(filenames)
-            sf.write(os.path.join(word_folder_path, str(index) + ".wav"), signal, SAMPLE_RATE,
-                     'PCM_16')
+        sf.write(file_path, signal, sample_rate, 'PCM_16')
+        if verbose:
+            print("Audio file saved: ", file_path)
     except:
         return False
-
     return True
 
 
