@@ -1,9 +1,11 @@
 import json
 import os
+import shutil
 
 from . import audio_subs_downloader as asd
 from .subs_analyser import get_phrases_and_timestamps_from_vtt
 from . import audio_analyser as aa
+from .. import validator as vl
 
 
 def get_not_yet_scraped_videos(videos_to_scrap, scraped_videos, verbose=0):
@@ -42,11 +44,15 @@ def generate_audio_words_per_link(link, lang, downloads_path, ds_path, scraped_v
     """
     # Get final list of videos to scrap
     videos_to_scrap = asd.get_videos_infos_list_from_link(link, lang)
+    if not os.path.exists(scraped_videos_path): # if scraped_videos_path does not exist I create an empty one
+        with open(scraped_videos_path, mode='w', encoding='utf8') as json_file:
+            json.dump([], json_file, sort_keys=True, indent=4, ensure_ascii=False)
     with open(scraped_videos_path, mode='r', encoding='utf8') as json_file:
         scraped_videos = json.load(json_file)
     not_yet_scraped_videos = get_not_yet_scraped_videos(videos_to_scrap, scraped_videos)
 
     if len(not_yet_scraped_videos) == 0:
+        print("Video(s) already scraped for this link: ", link)
         return True  # Nothing to do
     elif len(not_yet_scraped_videos) > 0:
         # Before start scraping I check the paths where I will put the file
@@ -67,32 +73,78 @@ def generate_audio_words_per_link(link, lang, downloads_path, ds_path, scraped_v
             if video['automatic_captions_lang']:
                 wav_path, subs_path = asd.download_audios_and_subs(video['link'], lang,
                                                                    audios_downloads_path, subs_downloads_path)
-                generate_audio_words_per_file(wav_path, subs_path, ds_path)
-                # TODO once audio_words are generated, remove wav and subs files
-    # TODO: Don't forget to update the json in scraped_videos_path
+                generate_audio_words_per_file(wav_path, subs_path, ds_path, lang)
+                # Once audio_words are generated, remove wav and subs files and append it to scraped_videos list
+                os.remove(wav_path)
+                os.remove(subs_path)
+                scraped_videos.append(video)
+    # Update the json in scraped_videos_path
+    with open(scraped_videos_path, mode='w', encoding='utf8') as json_file:
+        json.dump(scraped_videos, json_file, sort_keys=True, indent=4, ensure_ascii=False)
+
     return True
 
+JSON_WHITE_LIST = "/home/oscar/Mastering/AudioP_data/yotubeData/yt_audio_scraper/resources/dictionary/FR/most_common_5000.json"
+def is_word_white_listed(word):
+    return True
+    # TODO put this in another module, and consider to put in the list composed words also, like j'ai
+    index_min = 0
+    index_max = 500
+    with open(JSON_WHITE_LIST, mode='r', encoding='utf8') as json_file:
+        white_list = json.load(json_file)
+        if word in white_list[index_min:index_max]:
+            return True
+    return False
 
-def generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path):
+
+def generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path, lang, verbose=0):
+    score_positives = 0
+    score_negatives = 0
     if len(words) == len(cut_indexes):
         for i, cut_index_tuple in enumerate(cut_indexes):
+            print("--------------------------------------")
             signal_word = signal_phrase[cut_index_tuple[0]:cut_index_tuple[1]]
             word_name = words[i]
-            # TODO check if word_name is in white list
-            # Create path for word, if it does not exist
-            word_folder_path = os.path.join(ds_path, word_name)
-            if not os.path.exists(word_folder_path):
-                os.mkdir(word_folder_path)
-            # Calculate name for the audio file
-            number_of_files = len([name for name in os.listdir(word_folder_path) if os.path.isfile(name)])
-            index_prefix = format(number_of_files, "04d")
-            file_name = index_prefix + ".wav"
-            word_final_path = word_folder_path + "/" + file_name  # ds_path/word_name/0001.wav
-            aa.store_audio_file(signal_word, word_final_path, verbose=1)
-            # TODO validate generated word and keep score
+            if is_word_white_listed(word_name):
+                # Create path for word, if it does not exist
+                word_folder_path = os.path.join(ds_path, word_name)
+                if not os.path.exists(word_folder_path):
+                    os.mkdir(word_folder_path)
+                # Calculate name for the audio file and saved
+                number_of_files = len([name for name in os.listdir(word_folder_path)
+                                       if os.path.isfile(os.path.join(word_folder_path, name))])
+                index_prefix = format(number_of_files, "04d")
+                file_name = index_prefix + ".wav"
+                word_final_path = word_folder_path + "/" + file_name  # ds_path/word_name/0001.wav
+                aa.store_audio_file(signal_word, word_final_path, verbose=1)
+                # Validate audio_word, if not valid delete audio_word
+                # TODO optimize this once vl.recognize_signal is ready
+                word_predicted = vl.recognize_audio_file(word_final_path, lang, api_number=1)
+                if word_predicted == word_name:
+                    score_positives = score_positives+1
+                    pass
+                else:
+                    score_negatives = score_negatives+1
+                    os.remove(word_final_path)
+                    if number_of_files == 0:
+                        shutil.rmtree(word_folder_path)
+                    if verbose:
+                        print("Validation failed, word:", word_name, "predicted_word: ", word_predicted)
+                        print("audio file deleted: ", word_final_path)
+            else:
+                if verbose:
+                    print("Word skipped, not in white_list : ", word_name)
+    if verbose:
+        print("\n-------------------------------")
+        words_withe_list = [word for word in words if is_word_white_listed(word)]
+        print("words: ", len(words), words)
+        print("words white-listed: ", len(words_withe_list), words_withe_list)
+        print("score_positives: ", score_positives)
+        print("score_negatives: ", score_negatives)
+    return score_positives, score_negatives
 
 
-def generate_audio_words_per_file(audio_file, subs_file, ds_path):
+def generate_audio_words_per_file(audio_file, subs_file, ds_path, lang):
     """
     from the audio_file and with the help of subs_file
     it extracts the words (audio) and put them in the ds_path
@@ -115,7 +167,7 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path):
     #    Then it generates the audio files for each word
     print("\n\n--------------------- Extracting audio words for : ", audio_file, "-------BEGIN")
     for i, (phrase) in enumerate(phrases_dict['phrases']):
-        if i == i:  # Fix here the phrase index I want to analyse
+        if i == i:  # in range(0, 10):  # Fix here the phrase index I want to analyse
             phrase_timestamps = phrases_dict['timestamps'][i]
             print("\n--------------------------------------------------------------------------------------------------"
                   "------------------------")
@@ -123,7 +175,9 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path):
             print("------------------------------------")
             words, cut_indexes, signal_phrase = aa.get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps,
                                                                                            time_offset, audio_signal)
-            generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path)
+            score_positives, score_negatives = generate_audio_words_per_phrase(words, cut_indexes, signal_phrase,
+                                                                               ds_path, lang, 1)
+            # TODO compute score and exit if it is too bad, after first 20 guests
             print("----------------------------------------------------------------------------------------------------"
                   "----------------------")
     print("--------------------- Extracting audio words for : ", audio_file, "-------END\n\n")

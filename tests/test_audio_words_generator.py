@@ -1,5 +1,6 @@
 import pytest
 import json
+import os
 
 from .context import audioscraper
 
@@ -69,6 +70,7 @@ def test_generate_audio_words_per_link():
                        'id': '6EidHyDMH2Y',
                        'link': 'https://www.youtube.com/watch?v=6EidHyDMH2Y',
                        'automatic_captions_lang': True}]
+
     with open(SCRAPED_VIDEOS_PATH, mode='w', encoding='utf8') as json_file:
         json.dump(scraped_videos, json_file, sort_keys=True, indent=4, ensure_ascii=False)
 

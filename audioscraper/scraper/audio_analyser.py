@@ -81,7 +81,8 @@ def store_audio_file(signal, file_path, sample_rate=SAMPLE_RATE, verbose=0):
         sf.write(file_path, signal, sample_rate, 'PCM_16')
         if verbose:
             print("Audio file saved: ", file_path)
-    except:
+    except Exception as ex:
+        print("Exception: ", ex, ". When saving the file: ", file_path)
         return False
     return True
 

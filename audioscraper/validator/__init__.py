@@ -1,1 +1,1 @@
-from .validator import recognize
+from .validator import recognize_audio_file
