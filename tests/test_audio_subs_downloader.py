@@ -26,8 +26,9 @@ def test_get_videos_infos_list_from_link_video():
 
 
 def test_get_videos_infos_list_from_link_playlist():
-    link_playlist = 'https://www.youtube.com/playlist?list=PLA5UIoabheFMYWWnGFFxl8_nvVZWZSykc'
+    # link_playlist = 'https://www.youtube.com/playlist?list=PLA5UIoabheFMYWWnGFFxl8_nvVZWZSykc' #  113
+    link_playlist = 'https://www.youtube.com/watch?v=6EidHyDMH2Y&list=PLyXyEQ98BGgvT7c63diejUEgHpyY2qKip'
     list_1 = audioscraper.get_videos_infos_list_from_link(link_playlist, 'fr')
-    print("Playlist total videos: ", len(list_1))  # Last time checked, it were 113
+    print("Playlist total videos: ", len(list_1))  # Last time checked, it were 4
     print(list_1[0])
     assert len(list_1) > 0

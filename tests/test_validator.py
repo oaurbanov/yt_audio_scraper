@@ -11,7 +11,7 @@ def test_recognize_api_1():
     # Getting the prediction using Google Web Speech API: Max 50 queries per month
     word_predicted = vl.recognize_audio_file(AUDIO_WORD_PATH, lang='fr', api_number=1)
     print("\nPrediction: ", word_predicted)
-    assert "conversation" in word_predicted
+    assert "conversation" == word_predicted
 
 # # TODO: Fix credentials problem
 # def test_recognize_2():

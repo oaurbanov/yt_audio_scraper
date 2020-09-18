@@ -38,7 +38,6 @@ For better extractions, the videos should have audio with low noise and silence 
 ```
 
 ## TODOs:
-
-- When storing audio_words, check current video has not been stored yet, save audio_words in having into account the video ID
-- Get List of videos to extract from a link_playlist, it would more useful than the json
+- Implement sub-pack for white_listing words. To generate the main words to extract. Having also composed words (like j'ai)
+- Implement the validator.recognize_from_signal. To predict directly from audio-chunks, without creating the audio file
 - Fix audioscraper.validator for Google-cloud-speech

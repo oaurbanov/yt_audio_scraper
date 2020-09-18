@@ -7,6 +7,10 @@ from .subs_analyser import get_phrases_and_timestamps_from_vtt
 from . import audio_analyser as aa
 from .. import validator as vl
 
+TEMP_DOWNLOADS_PATH = './.tmp'
+SCRAPED_VIDEOS_JSON_NAME = '.scraped_videos_history.json'
+JSON_WHITE_LIST = "../audioscraper/scraper/whitelist/FR/most_common_5000.json"
+
 
 def get_not_yet_scraped_videos(videos_to_scrap, scraped_videos, verbose=0):
     # compare video_infos_lists
@@ -30,18 +34,26 @@ def get_not_yet_scraped_videos(videos_to_scrap, scraped_videos, verbose=0):
     return videos_not_yet_scraped
 
 
-def generate_audio_words_per_link(link, lang, downloads_path, ds_path, scraped_videos_path):
+def generate_audio_words_per_link(link, lang, ds_path):
     """
     Generates the audio_words in ds_path dir, if video(s) link have been already scraped
     i.e. contained in scraped_videos_path, then it does not generate audio_words again
     just to not replicate data in the dataSet
     :param link: of the videos of playlist
     :param lang: fr, en, es
-    :param downloads_path: where audio and sub files per video would be left temporarily
     :param ds_path: where audio_words will be extracted permanently
-    :param scraped_videos_path: json containing register of already scraped videos
     :return: True if ok, False if something some error
     """
+
+    # Before start scraping I check the paths where I will put the files
+    if not os.path.exists(ds_path):
+        print("ERROR: dataSet path does not exist")
+        return False
+    downloads_path = TEMP_DOWNLOADS_PATH  # here I will put temporarily the .wav and .vtt files downloaded per link
+    scraped_videos_path = os.path.join(ds_path, SCRAPED_VIDEOS_JSON_NAME)
+    if not os.path.exists(downloads_path):
+        os.mkdir(downloads_path)
+
     # Get final list of videos to scrap
     videos_to_scrap = asd.get_videos_infos_list_from_link(link, lang)
     if not os.path.exists(scraped_videos_path): # if scraped_videos_path does not exist I create an empty one
@@ -51,40 +63,26 @@ def generate_audio_words_per_link(link, lang, downloads_path, ds_path, scraped_v
         scraped_videos = json.load(json_file)
     not_yet_scraped_videos = get_not_yet_scraped_videos(videos_to_scrap, scraped_videos)
 
-    if len(not_yet_scraped_videos) == 0:
-        print("Video(s) already scraped for this link: ", link)
-        return True  # Nothing to do
-    elif len(not_yet_scraped_videos) > 0:
-        # Before start scraping I check the paths where I will put the file
-        if not os.path.exists(downloads_path):
-            print("ERROR: download path does not exist")
-            return False
-        if not os.path.exists(ds_path):
-            print("ERROR: dataSet path does not exist")
-            return False
-        audios_downloads_path = os.path.join(downloads_path, 'audios')
-        subs_downloads_path = os.path.join(downloads_path, 'subs')
-        if not os.path.exists(audios_downloads_path):
-            os.mkdir(audios_downloads_path)
-        if not os.path.exists(subs_downloads_path):
-            os.mkdir(subs_downloads_path)
-
+    if len(not_yet_scraped_videos) > 0:
         for video in not_yet_scraped_videos:
             if video['automatic_captions_lang']:
-                wav_path, subs_path = asd.download_audios_and_subs(video['link'], lang,
-                                                                   audios_downloads_path, subs_downloads_path)
+                wav_path, subs_path = asd.download_audios_and_subs(video['link'], lang, downloads_path, downloads_path)
                 generate_audio_words_per_file(wav_path, subs_path, ds_path, lang)
                 # Once audio_words are generated, remove wav and subs files and append it to scraped_videos list
                 os.remove(wav_path)
                 os.remove(subs_path)
                 scraped_videos.append(video)
+    else:
+        print("Video(s) already scraped for this link: ", link)
+        return True  # Nothing to do
+
     # Update the json in scraped_videos_path
     with open(scraped_videos_path, mode='w', encoding='utf8') as json_file:
         json.dump(scraped_videos, json_file, sort_keys=True, indent=4, ensure_ascii=False)
 
     return True
 
-JSON_WHITE_LIST = "/home/oscar/Mastering/AudioP_data/yotubeData/yt_audio_scraper/resources/dictionary/FR/most_common_5000.json"
+
 def is_word_white_listed(word):
     return True
     # TODO put this in another module, and consider to put in the list composed words also, like j'ai
