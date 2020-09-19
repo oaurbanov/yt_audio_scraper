@@ -65,12 +65,10 @@ def download_audios_and_subs(link, lang, downloads_path):
     print("Video link: ", link)
     print("Video title: ", video_title)
     print("Video id: ", video_id)
-    for dirpath, dirnames, filenames in os.walk(downloads_path):
-        print("filenames: ", filenames)
     print("---------------------------------------\n")
 
     # 2. Returning download paths for subs and audio files
-    wav_file_path_destination = os.path.join(downloads_path, video_id)
+    wav_file_path_destination = os.path.join('./.wav')
     sub_file_path_destination = os.path.join(downloads_path, video_id + "." + lang + ".vtt")
 
     print("\n----------Downloaded audio subs Paths-----------")
