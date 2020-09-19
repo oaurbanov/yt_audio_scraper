@@ -66,7 +66,7 @@ def generate_audio_words_per_link(link, lang, ds_path):
     if len(not_yet_scraped_videos) > 0:
         for video in not_yet_scraped_videos:
             if video['automatic_captions_lang']:
-                wav_path, subs_path = asd.download_audios_and_subs(video['link'], lang, downloads_path, downloads_path)
+                wav_path, subs_path = asd.download_audios_and_subs(video['link'], lang, downloads_path)
                 generate_audio_words_per_file(wav_path, subs_path, ds_path, lang)
                 # Once audio_words are generated, remove wav and subs files and append it to scraped_videos list
                 os.remove(wav_path)

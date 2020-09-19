@@ -41,7 +41,7 @@ def get_videos_infos_list_from_link(link, lang):
     return video_infos_list
 
 
-def download_audios_and_subs(link, lang, audios_path, subs_path):
+def download_audios_and_subs(link, lang, downloads_path):
     """
     from the youtube link it extracts audio in wav format
     and subtitles in .vtt format
@@ -50,6 +50,7 @@ def download_audios_and_subs(link, lang, audios_path, subs_path):
                 'writeautomaticsub': True,
                 'subtitlesformat': 'vtt',
                 'subtitleslangs': [lang],
+                'outtmpl': downloads_path+'/%(id)s',
                 'postprocessors': [{'key': 'FFmpegExtractAudio',
                                     'preferredcodec': 'wav',
                                     'preferredquality': '0'}],
@@ -64,25 +65,19 @@ def download_audios_and_subs(link, lang, audios_path, subs_path):
     print("Video link: ", link)
     print("Video title: ", video_title)
     print("Video id: ", video_id)
+    for dirpath, dirnames, filenames in os.walk(downloads_path):
+        print("filenames: ", filenames)
     print("---------------------------------------\n")
 
-    # 2. Move generated files to the correct dirs
-    # 2.1. moving wav file
-    wav_file_path_origin = "./wav"
-    wav_file_path_destination = os.path.join(audios_path, video_id + ".wav")
-    os.rename(wav_file_path_origin, wav_file_path_destination)
-    # 2.2. moving subtitles file
-    for dirpath, dirnames, filenames in os.walk("."):
-        found_flag = False
-        for file_name in filenames:
-            if video_id in file_name and ".fr.vtt" in file_name:
-                sub_file_path_origin = file_name
-                found_flag = True
-                break
-        if found_flag:
-            break
-    sub_file_path_destination = os.path.join(subs_path, video_id + "." + lang + ".vtt")
-    os.rename(sub_file_path_origin, sub_file_path_destination)
+    # 2. Returning download paths for subs and audio files
+    wav_file_path_destination = os.path.join(downloads_path, video_id)
+    sub_file_path_destination = os.path.join(downloads_path, video_id + "." + lang + ".vtt")
+
+    print("\n----------Downloaded audio subs Paths-----------")
+    print("wav_file_path_destination: ", wav_file_path_destination)
+    print("sub_file_path_destination: ", sub_file_path_destination)
+    print("---------------------------------------\n")
+
     return wav_file_path_destination, sub_file_path_destination
 
 
