@@ -4,7 +4,7 @@ import os
 
 from .context import audioscraper
 
-DS_PATH = "./resources/scraper/dataSet"
+DS_PATH = os.path.join(os.path.dirname(__file__), 'resources/scraper/dataSet')
 SCRAPED_VIDEOS_JSON_NAME = '.scraped_videos_history.json'
 
 
@@ -72,8 +72,11 @@ def test_generate_audio_words_per_link():
                        'link': 'https://www.youtube.com/watch?v=6EidHyDMH2Y',
                        'automatic_captions_lang': True}]
 
+    # first check the DS_PATH exist
+    if not os.path.exists(DS_PATH):
+        os.mkdir(DS_PATH)
+
     with open(os.path.join(DS_PATH, SCRAPED_VIDEOS_JSON_NAME), mode='w', encoding='utf8') as json_file:
         json.dump(scraped_videos, json_file, sort_keys=True, indent=4, ensure_ascii=False)
 
     assert audioscraper.generate_audio_words_per_link(link, 'fr', DS_PATH)
-

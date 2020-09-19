@@ -14,30 +14,25 @@ For better extractions, the videos should have audio with low noise and silence 
 │   ├── scraper    --> extracts the audio_words, generates the DataSet
 │   ├── validator  --> validates and cleans extracted audo_words in DataSet
 │   └── controller --> handles the other packs for a standalone operation in a server
-│
-├── resources
-│   └── dictionary
-│       └── FR    --> withe list of french audio words to extract
-│
+│   └── dictionary --> handles withe-list of most common audio_words per language
 └── tests
     ├── context.py
     ├── test_audio_analyser.py
-    ├── test_scraper.py
+    ├── test_audio_subs_downloader.py
+    ├── test_audio_words_generator.py
     ├── test_validator.py
-    └── resources          --> resources for the tests
+    └── .tmp   --> temporal files for tests
+    └── resources   --> resources for tests
         └── scraper
-            ├── dataSets   --> generated dataSet with test_scraper.py
-            │   ├── one
-            │   ├── two
-            │   └── three
-            ├── downloads
-            │   ├── audios
-            │   └── subs
-            └── video_links.json  --> contains links of videos to scrape
+            └── dataSet  --> generated dataSet with test_audio_words_generator.py
+                ├── one
+                ├── two
+                ├── three
+                └── .scraped_videos_history.json  --> keeps register of scraped videos, to avoid data replication
 
 ```
 
 ## TODOs:
-- Implement sub-pack for white_listing words. To generate the main words to extract. Having also composed words (like j'ai)
+- Finish sub-pack dictionary. Consider also composed words (like j'ai)
 - Implement the validator.recognize_from_signal. To predict directly from audio-chunks, without creating the audio file
 - Fix audioscraper.validator for Google-cloud-speech

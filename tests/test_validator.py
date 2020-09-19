@@ -1,9 +1,10 @@
 import pytest
+import os
+
 from .context import audioscraper
 from audioscraper import validator as vl
 
-
-AUDIO_WORD_PATH = "./resources/conversation.wav"
+AUDIO_WORD_PATH = os.path.join(os.path.dirname(__file__), 'resources/conversation.wav')
 GOOGLE_API_CREDENTIALS = "/home/oscar/yt-scraper-289512-4338fa9d704e.json"
 
 

@@ -6,10 +6,10 @@ from . import audio_subs_downloader as asd
 from .subs_analyser import get_phrases_and_timestamps_from_vtt
 from . import audio_analyser as aa
 from .. import validator as vl
+from .. import dictionary as dt
 
 TEMP_DOWNLOADS_PATH = './.tmp'
 SCRAPED_VIDEOS_JSON_NAME = '.scraped_videos_history.json'
-JSON_WHITE_LIST = "../audioscraper/scraper/whitelist/FR/most_common_5000.json"
 
 
 def get_not_yet_scraped_videos(videos_to_scrap, scraped_videos, verbose=0):
@@ -37,12 +37,12 @@ def get_not_yet_scraped_videos(videos_to_scrap, scraped_videos, verbose=0):
 def generate_audio_words_per_link(link, lang, ds_path):
     """
     Generates the audio_words in ds_path dir, if video(s) link have been already scraped
-    i.e. contained in scraped_videos_path, then it does not generate audio_words again
+    i.e. contained in scraped_videos_history.json, then it does not generate audio_words again
     just to not replicate data in the dataSet
-    :param link: of the videos of playlist
-    :param lang: fr, en, es
-    :param ds_path: where audio_words will be extracted permanently
-    :return: True if ok, False if something some error
+    :param link: of the videos or playlist
+    :param lang: fr, en, es ...
+    :param ds_path: where audio_words will be saved
+    :return: True if ok, False if something went wrong
     """
 
     # Before start scraping I check the paths where I will put the files
@@ -72,27 +72,14 @@ def generate_audio_words_per_link(link, lang, ds_path):
                 os.remove(wav_path)
                 os.remove(subs_path)
                 scraped_videos.append(video)
+                # Update the json in scraped_videos_path
+                with open(scraped_videos_path, mode='w', encoding='utf8') as json_file:
+                    json.dump(scraped_videos, json_file, sort_keys=True, indent=4, ensure_ascii=False)
     else:
         print("Video(s) already scraped for this link: ", link)
         return True  # Nothing to do
 
-    # Update the json in scraped_videos_path
-    with open(scraped_videos_path, mode='w', encoding='utf8') as json_file:
-        json.dump(scraped_videos, json_file, sort_keys=True, indent=4, ensure_ascii=False)
-
     return True
-
-
-def is_word_white_listed(word):
-    return True
-    # TODO put this in another module, and consider to put in the list composed words also, like j'ai
-    index_min = 0
-    index_max = 500
-    with open(JSON_WHITE_LIST, mode='r', encoding='utf8') as json_file:
-        white_list = json.load(json_file)
-        if word in white_list[index_min:index_max]:
-            return True
-    return False
 
 
 def generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path, lang, verbose=0):
@@ -103,7 +90,7 @@ def generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path, 
             print("--------------------------------------")
             signal_word = signal_phrase[cut_index_tuple[0]:cut_index_tuple[1]]
             word_name = words[i]
-            if is_word_white_listed(word_name):
+            if dt.is_word_white_listed(word_name, lang):
                 # Create path for word, if it does not exist
                 word_folder_path = os.path.join(ds_path, word_name)
                 if not os.path.exists(word_folder_path):
@@ -134,7 +121,7 @@ def generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path, 
                     print("Word skipped, not in white_list : ", word_name)
     if verbose:
         print("\n-------------------------------")
-        words_withe_list = [word for word in words if is_word_white_listed(word)]
+        words_withe_list = [word for word in words if dt.is_word_white_listed(word, lang)]
         print("words: ", len(words), words)
         print("words white-listed: ", len(words_withe_list), words_withe_list)
         print("score_positives: ", score_positives)
