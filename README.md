@@ -33,6 +33,7 @@ For better extractions, the videos should have audio with low noise and silence 
 ```
 
 ## TODOs:
+- Improve path handling, and put main.py at audioscraper pack level
 - Finish sub-pack dictionary. Consider also composed words (like j'ai)
 - Implement the validator.recognize_from_signal. To predict directly from audio-chunks, without creating the audio file
 - Fix audioscraper.validator for Google-cloud-speech
