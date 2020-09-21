@@ -33,5 +33,6 @@ def test_load_audio_signal():
     aa.store_audio_file(np_signal, SAMPLE_RATE, file_path)
 
     y, sr = aa.load_audio_signal(file_path, verbose=1)
+    print("len shape: ", len(y.shape))
     assert len(y) > 0 and sr > 0
     os.remove(file_path)

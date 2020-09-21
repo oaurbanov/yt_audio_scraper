@@ -1,4 +1,5 @@
 import soundfile as sf
+import psutil as pu
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -61,12 +62,23 @@ def load_audio_signal(audio_file, verbose=0):
     """
     print("\n--------------------------------")
     print("Loading audio signal ...")
-    y, sr = sf.read(audio_file)
-    y = y.mean(axis=1)  # from 2 channel wav to 1 channel
+    y, sr = sf.read(audio_file, dtype='float32')
+
+    # From stereo to mono-channel, carefully due to mem limitations
+    if len(y.shape) == 2:
+        # AWS 1 Gb-ram VirtualMachine has very limited memory
+        mem_to_alloc = y.shape[0] * 32/8  # array len * Float 32 bit / 8 bit per byte
+        mem_available = 0.9 * float(pu.virtual_memory().available)  # bytes
+        if y.shape[1] == 2:
+            if mem_to_alloc > mem_available:
+                print("ERROR: max allocation reached in VM: ", mem_to_alloc * 0.000002, " Mb, from: ",
+                      mem_available * 0.000001, "Mb")
+                raise MemoryError
+            y = y.mean(axis=1)  # from 2 channel wav to 1 channel
     print("Audio signal loaded ")
+
     if verbose:
         print("Sample rate: ", sr)
-        print(y.shape)
         describe_signal(y, "Loaded wav signal")
     print("--------------------------------\n")
     return y, sr

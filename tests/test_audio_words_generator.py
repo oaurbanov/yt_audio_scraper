@@ -1,13 +1,14 @@
 import pytest
 import json
 import os
+import shutil
 
 from .context import audioscraper
 
 DS_PATH = os.path.join(os.path.dirname(__file__), 'resources/scraper/dataSet')
 SCRAPED_VIDEOS_JSON_NAME = '.scraped_videos_history.json'
 
-@pytest.mark.skip
+
 def test_get_not_yet_scraped_videos():
     videos_to_scrap = [{'title': 'Jokes in Slow French - Learn French',
                         'id': '6EidHyDMH2Y',
@@ -76,7 +77,20 @@ def test_generate_audio_words_per_link():
     if not os.path.exists(DS_PATH):
         os.mkdir(DS_PATH)
 
+    # create the .scraped_videos_history.json
     with open(os.path.join(DS_PATH, SCRAPED_VIDEOS_JSON_NAME), mode='w', encoding='utf8') as json_file:
         json.dump(scraped_videos, json_file, sort_keys=True, indent=4, ensure_ascii=False)
 
-    assert audioscraper.generate_audio_words_per_link(link, 'fr', DS_PATH)
+    # generating audio_words
+    r = audioscraper.generate_audio_words_per_link(link, 'fr', DS_PATH)
+
+    # count audio_words generated, just folders, not files
+    folder_names = []
+    for root, dirs, files in os.walk(DS_PATH):
+        folder_names = dirs
+        break
+    print(folder_names)  # ['lunettes', 'serveur', 'restaurant', 'description', 'pourriez', 'vidéo', 'justement', ...]
+    assert r and len(folder_names) > 3
+
+    # clean generated audio_words
+    shutil.rmtree(DS_PATH)
