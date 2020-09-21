@@ -136,6 +136,7 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path, lang):
     :param audio_file: there is one audio_file per video
     :param subs_file: the subs file in .vtt format, it is organized by phrases
     :param ds_path: directory where the generated audio_words are put
+    :param lang: language needed for the dictionary white-list
     """
 
     # 1. get phrases and timestamps in a dictionary
@@ -146,23 +147,36 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path, lang):
     time_offset = get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict)
 
     # 2. Loads the audio_file in the audio_signal
-    audio_signal = aa.load_audio_signal(audio_file)
+    try:
+        audio_signal = aa.load_audio_signal(audio_file)
+    except SystemError:
+        print("ERROR: exception catch. Error opening 'home/ubuntu/.wav': System error.")
+        return False
 
     # 3. Iterates through each phrase and get the words and cut_indexes
     #    Then it generates the audio files for each word
     print("\n\n--------------------- Extracting audio words for : ", audio_file, "-------BEGIN")
-    for i, (phrase) in enumerate(phrases_dict['phrases']):
-        if i == i:  # in range(0, 10):  # Fix here the phrase index I want to analyse
-            phrase_timestamps = phrases_dict['timestamps'][i]
-            print("\n--------------------------------------------------------------------------------------------------"
-                  "------------------------")
-            print(phrase, phrase_timestamps, " time_offset: ", time_offset)
-            print("------------------------------------")
-            words, cut_indexes, signal_phrase = aa.get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps,
-                                                                                           time_offset, audio_signal)
-            score_positives, score_negatives = generate_audio_words_per_phrase(words, cut_indexes, signal_phrase,
-                                                                               ds_path, lang, 1)
-            # TODO compute score and exit if it is too bad, after first 20 guests
-            print("----------------------------------------------------------------------------------------------------"
-                  "----------------------")
+    try:
+        for i, (phrase) in enumerate(phrases_dict['phrases']):
+            if i == i:  # in range(0, 10):  # Fix here the phrase index I want to analyse
+                phrase_timestamps = phrases_dict['timestamps'][i]
+                print("\n----------------------------------------------------------------------------------------------"
+                      "----------------------------")
+                print(phrase, phrase_timestamps, " time_offset: ", time_offset)
+                print("------------------------------------")
+                words, cut_indexes, signal_phrase = aa.get_words_cut_indexes_and_signal_phrase(phrase,
+                                                                                               phrase_timestamps,
+                                                                                               time_offset,
+                                                                                               audio_signal)
+                score_positives, score_negatives = generate_audio_words_per_phrase(words, cut_indexes, signal_phrase,
+                                                                                   ds_path, lang, 1)
+                # TODO compute score and exit if it is too bad, after first 20 guests
+                print("------------------------------------------------------------------------------------------------"
+                      "--------------------------")
+    except Exception as ex:
+        # TODO if it repeats too much, it needs to be solved in the modules inside
+        print("ERROR: exception catch: ", ex, "\nDuring extracting audio words for : ", audio_file)
+        return False
     print("--------------------- Extracting audio words for : ", audio_file, "-------END\n\n")
+
+    return True
