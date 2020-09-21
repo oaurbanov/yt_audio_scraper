@@ -149,8 +149,14 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path, lang):
     # 2. Loads the audio_file in the audio_signal
     try:
         audio_signal = aa.load_audio_signal(audio_file)
-    except SystemError:
-        print("ERROR: exception catch. Error opening 'home/ubuntu/.wav': System error.")
+    except SystemError as ex:
+        print("ERROR: exception catch. Error opening 'home/ubuntu/.wav'. ", ex)
+        return False
+    except MemoryError as ex:
+        print("ERROR: exception catch. Error opening 'home/ubuntu/.wav'. ", ex)
+        return False
+    except BaseException as ex:
+        print("ERROR: exception catch. Error opening 'home/ubuntu/.wav': OTHER_EXCEPTION. ", ex.__class__, ". ", ex)
         return False
 
     # 3. Iterates through each phrase and get the words and cut_indexes
@@ -173,9 +179,10 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path, lang):
                 # TODO compute score and exit if it is too bad, after first 20 guests
                 print("------------------------------------------------------------------------------------------------"
                       "--------------------------")
-    except Exception as ex:
+    except BaseException as ex:
         # TODO if it repeats too much, it needs to be solved in the modules inside
-        print("ERROR: exception catch: ", ex, "\nDuring extracting audio words for : ", audio_file)
+        print("ERROR: exception catch. During extracting audio words for : ", audio_file)
+        print(ex.__class__, ". ", ex)
         return False
     print("--------------------- Extracting audio words for : ", audio_file, "-------END\n\n")
 

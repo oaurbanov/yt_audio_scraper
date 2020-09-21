@@ -65,9 +65,10 @@ def load_audio_signal(audio_file, target_sample_rate=SAMPLE_RATE, verbose=0):
     """
     print("\n--------------------------------")
     print("Loading audio signal ...")
-    # I use librosa since it sets a target_sample_rate
-    y, sr = librosa.load(audio_file, target_sample_rate)
-    # y, sr = sf.read(audio_file)
+    y, sr = sf.read(audio_file)
+    global SAMPLE_RATE
+    SAMPLE_RATE = sr    
+    # y, sr = librosa.load(audio_file, target_sample_rate) # I use librosa since it sets a target_sample_rate
     print("Audio signal loaded ")
     if verbose:
         print("Sample rate: ", sr)
