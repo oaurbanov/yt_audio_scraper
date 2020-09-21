@@ -1,8 +1,6 @@
 import speech_recognition as sr
 import json
 
-SAMPLE_RATE = 22050
-
 
 def recognize_audio_signal():
     # TODO build sr.AudioFile()  from signal, frame-rate

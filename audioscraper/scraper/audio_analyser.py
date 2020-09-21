@@ -1,7 +1,3 @@
-import os
-import librosa
-
-import numpy as np
 import soundfile as sf
 
 import matplotlib.pyplot as plt
@@ -12,8 +8,8 @@ from .silence_analyser import find_silences, clean_signal_on_borders
 from .phrase_analyser import get_temptative_cuts
 from .utils import *
 
-# samples per second
-SAMPLE_RATE = 22050
+# samples per second, Not used anymore since librosa killed error
+# SAMPLE_RATE = 22050
 
 # Time that subs can be offset from actual audio
 SUBS_TIME_ADJUSTMENT = 100  # miliseconds
@@ -58,7 +54,7 @@ def plot_signal_result(signal_phrase, silences, temptative_cut_indexes, cut_inde
     plt.show()
 
 
-def load_audio_signal(audio_file, target_sample_rate=SAMPLE_RATE, verbose=0):
+def load_audio_signal(audio_file, verbose=0):
     """
     returns normalized audio signal, if stereo make it mono
     and adapt it to the sample_rate
@@ -66,18 +62,17 @@ def load_audio_signal(audio_file, target_sample_rate=SAMPLE_RATE, verbose=0):
     print("\n--------------------------------")
     print("Loading audio signal ...")
     y, sr = sf.read(audio_file)
-    global SAMPLE_RATE
-    SAMPLE_RATE = sr    
-    # y, sr = librosa.load(audio_file, target_sample_rate) # I use librosa since it sets a target_sample_rate
+    y = y.mean(axis=1)  # from 2 channel wav to 1 channel
     print("Audio signal loaded ")
     if verbose:
         print("Sample rate: ", sr)
+        print(y.shape)
         describe_signal(y, "Loaded wav signal")
     print("--------------------------------\n")
-    return y
+    return y, sr
 
 
-def store_audio_file(signal, file_path, sample_rate=SAMPLE_RATE, verbose=0):
+def store_audio_file(signal, sample_rate, file_path, verbose=0):
     try:
         sf.write(file_path, signal, sample_rate, 'PCM_16')
         if verbose:
@@ -96,7 +91,7 @@ def store_audio_file(signal, file_path, sample_rate=SAMPLE_RATE, verbose=0):
 #     return temptative_cut_index
 
 
-def get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, time_offset, signal, sample_rate=SAMPLE_RATE,
+def get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, time_offset, signal, sample_rate,
                                             subs_time_adjustment=SUBS_TIME_ADJUSTMENT, verbose=1):
     # 0. Put the offset, set generally in the 5th line of the .vtt subs file:
     # 00:00:01.399 --> 00:00:04.999 align:start position:0%
@@ -129,7 +124,7 @@ def get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, time_offs
     # 2. extract silences and temptative_cut_indexes
 
     # 2.1. find silences
-    energy_signal, threshold, silences = find_silences(signal_phrase, SAMPLE_RATE)
+    energy_signal, threshold, silences = find_silences(signal_phrase, sample_rate)
     # 2.2. clean signal_phrase on borders and adjust silences
     silences, signal_phrase, energy_signal = clean_signal_on_borders(silences, signal_phrase, energy_signal)
     print("Silences: ", len(silences), ", ", silences)

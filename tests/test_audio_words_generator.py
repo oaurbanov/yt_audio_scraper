@@ -7,7 +7,7 @@ from .context import audioscraper
 DS_PATH = os.path.join(os.path.dirname(__file__), 'resources/scraper/dataSet')
 SCRAPED_VIDEOS_JSON_NAME = '.scraped_videos_history.json'
 
-
+@pytest.mark.skip
 def test_get_not_yet_scraped_videos():
     videos_to_scrap = [{'title': 'Jokes in Slow French - Learn French',
                         'id': '6EidHyDMH2Y',
@@ -42,7 +42,7 @@ def test_get_not_yet_scraped_videos():
 
 
 # This is too big test to run it along with the other, Delete the mark to run it
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_generate_audio_words_per_link():
     link = 'https://www.youtube.com/watch?v=6EidHyDMH2Y&list=PLyXyEQ98BGgvT7c63diejUEgHpyY2qKip'
     # videos_on_link = [{'title': 'Jokes in Slow French - Learn French',

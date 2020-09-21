@@ -82,7 +82,7 @@ def generate_audio_words_per_link(link, lang, ds_path):
     return True
 
 
-def generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path, lang, verbose=0):
+def generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, sample_rate, ds_path, lang, verbose=0):
     score_positives = 0
     score_negatives = 0
     if len(words) == len(cut_indexes):
@@ -101,7 +101,7 @@ def generate_audio_words_per_phrase(words, cut_indexes, signal_phrase, ds_path, 
                 index_prefix = format(number_of_files, "04d")
                 file_name = index_prefix + ".wav"
                 word_final_path = word_folder_path + "/" + file_name  # ds_path/word_name/0001.wav
-                aa.store_audio_file(signal_word, word_final_path, verbose=1)
+                aa.store_audio_file(signal_word, sample_rate, word_final_path, verbose=1)
                 # Validate audio_word, if not valid delete audio_word
                 # TODO optimize this once vl.recognize_signal is ready
                 word_predicted = vl.recognize_audio_file(word_final_path, lang, api_number=1)
@@ -148,15 +148,15 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path, lang):
 
     # 2. Loads the audio_file in the audio_signal
     try:
-        audio_signal = aa.load_audio_signal(audio_file)
+        audio_signal, sample_rate = aa.load_audio_signal(audio_file, verbose=1)
     except SystemError as ex:
-        print("ERROR: exception catch. Error opening 'home/ubuntu/.wav'. ", ex)
+        print("ERROR: exception catch. Error opening ", audio_file, ". ", ex)
         return False
     except MemoryError as ex:
-        print("ERROR: exception catch. Error opening 'home/ubuntu/.wav'. ", ex)
+        print("ERROR: exception catch. Error opening ", audio_file, ". ", ex)
         return False
     except BaseException as ex:
-        print("ERROR: exception catch. Error opening 'home/ubuntu/.wav': OTHER_EXCEPTION. ", ex.__class__, ". ", ex)
+        print("ERROR: exception catch. Error opening ", audio_file, ": OTHER_EXCEPTION. ", ex.__class__, ". ", ex)
         return False
 
     # 3. Iterates through each phrase and get the words and cut_indexes
@@ -173,9 +173,10 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path, lang):
                 words, cut_indexes, signal_phrase = aa.get_words_cut_indexes_and_signal_phrase(phrase,
                                                                                                phrase_timestamps,
                                                                                                time_offset,
-                                                                                               audio_signal)
+                                                                                               audio_signal,
+                                                                                               sample_rate)
                 score_positives, score_negatives = generate_audio_words_per_phrase(words, cut_indexes, signal_phrase,
-                                                                                   ds_path, lang, 1)
+                                                                                   sample_rate, ds_path, lang, 1)
                 # TODO compute score and exit if it is too bad, after first 20 guests
                 print("------------------------------------------------------------------------------------------------"
                       "--------------------------")

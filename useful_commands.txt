@@ -5,7 +5,8 @@ conda activate scraper37
 
 # scraper
 conda install -c conda-forge youtube-dl
-conda install -c conda-forge librosa
+conda install -c conda-forge pysoundfile
+conda install -c conda-forge matplotlib
 
 # validator
 conda install -c conda-forge SpeechRecognition
