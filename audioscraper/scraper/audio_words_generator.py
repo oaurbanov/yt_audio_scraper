@@ -2,11 +2,11 @@ import json
 import os
 import shutil
 
-from . import audio_subs_downloader as asd
-from .subs_analyser import get_phrases_and_timestamps_from_vtt
-from . import audio_analyser as aa
-from .. import validator as vl
-from .. import dictionary as dt
+from audioscraper.scraper import audio_subs_downloader as asd
+from audioscraper.scraper import subs_analyser as sa
+from audioscraper.scraper import audio_analyser as aa
+from audioscraper.validator import validator as vl
+from audioscraper import dictionary as dt
 
 TEMP_DOWNLOADS_PATH = './.tmp'
 SCRAPED_VIDEOS_JSON_NAME = '.scraped_videos_history.json'
@@ -144,7 +144,7 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path, lang):
         'phrases': [],
         'timestamps': [],
     }
-    time_offset = get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict)
+    time_offset = sa.get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict)
 
     # 2. Loads the audio_file in the audio_signal
     try:

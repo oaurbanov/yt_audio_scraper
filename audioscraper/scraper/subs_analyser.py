@@ -3,7 +3,7 @@
 import re
 import pprint
 
-from . import phrase_analyser as pa
+from audioscraper.scraper import phrase_analyser as pa
 
 
 def get_secs(t_string):

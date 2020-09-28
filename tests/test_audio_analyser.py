@@ -2,8 +2,7 @@ import pytest
 import os
 import numpy as np
 
-from .context import audioscraper
-from audioscraper import audio_analyser as aa
+from audioscraper.scraper import audio_analyser as aa
 
 SAMPLE_RATE = 22050
 
