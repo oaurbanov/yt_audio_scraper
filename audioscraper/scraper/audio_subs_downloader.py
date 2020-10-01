@@ -29,7 +29,11 @@ def get_videos_infos_list_from_link(link, lang):
                 'format': 'bestaudio/best'}
     print("\n\n--------------------- Getting info from link: ", link)
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info_object = ydl.extract_info(link, download=False)
+        try:
+            info_object = ydl.extract_info(link, download=False)
+        except BaseException as ex:
+            print("Exception catch in get_videos_infos_list_from_link: ", ex)
+            return []
         if '_type' in info_object.keys():
             if info_object['_type'] == 'playlist':
                 # link passed is a playlist from Youtube
@@ -58,7 +62,11 @@ def download_audios_and_subs(link, lang, downloads_path):
     # 1. Download video, audio and subs
     print("\n--------------------- Downloading audio and subs from link: ", link)
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info_video = ydl.extract_info(link, download=True)
+        try:
+            info_video = ydl.extract_info(link, download=True)
+        except BaseException as ex:
+            print("Exception catch in download_audios_and_subs: ", ex)
+            return "",""
         video_title = info_video["title"]
         video_id = info_video["id"]
     print("\n----------Downloaded audio subs-----------")
