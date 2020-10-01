@@ -7,6 +7,7 @@ from .subs_analyser import get_phrases_and_timestamps_from_vtt
 from . import audio_analyser as aa
 from .. import validator as vl
 from .. import dictionary as dt
+from . import utils 
 
 TEMP_DOWNLOADS_PATH = './.tmp'
 SCRAPED_VIDEOS_JSON_NAME = '.scraped_videos_history.json'
@@ -147,6 +148,12 @@ def generate_audio_words_per_file(audio_file, subs_file, ds_path, lang):
     time_offset = get_phrases_and_timestamps_from_vtt(subs_file, phrases_dict)
 
     # 2. Loads the audio_file in the audio_signal
+    duration_mins =  utils.get_secs(phrases_dict['timestamps'][-1][1]) / 60.0
+    print("duration (secs) :", duration_mins)
+    if duration_mins > 30 :  # 30 min
+        print("Error: too long video, ", duration_mins, " minutes. Limit is 30 minutes")
+        return False
+    
     try:
         audio_signal, sample_rate = aa.load_audio_signal(audio_file, verbose=1)
     except SystemError as ex:

@@ -55,7 +55,7 @@ def plot_signal_result(signal_phrase, silences, temptative_cut_indexes, cut_inde
     plt.show()
 
 
-def load_audio_signal(audio_file, verbose=0):
+def load_audio_signal(audio_file, verbose=1):
     """
     returns normalized audio signal, if stereo make it mono
     and adapt it to the sample_rate
@@ -63,6 +63,7 @@ def load_audio_signal(audio_file, verbose=0):
     print("\n--------------------------------")
     print("Loading audio signal ...")
     y, sr = sf.read(audio_file, dtype='float32')
+    print("First load complete")
 
     # From stereo to mono-channel, carefully due to mem limitations
     if len(y.shape) == 2:
@@ -71,7 +72,7 @@ def load_audio_signal(audio_file, verbose=0):
         mem_available = 0.9 * float(pu.virtual_memory().available)  # bytes
         if y.shape[1] == 2:
             if mem_to_alloc > mem_available:
-                print("ERROR: max allocation reached in VM: ", mem_to_alloc * 0.000002, " Mb, from: ",
+                print("ERROR: max allocation reached in VM: ", mem_to_alloc * 0.000001, " Mb, from: ",
                       mem_available * 0.000001, "Mb")
                 raise MemoryError
             y = y.mean(axis=1)  # from 2 channel wav to 1 channel
