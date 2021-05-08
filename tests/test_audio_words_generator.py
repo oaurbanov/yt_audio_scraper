@@ -3,9 +3,9 @@ import json
 import os
 import shutil
 
-from .context import audioscraper
+from audioscraper.scraper import audio_words_generator as awg
 
-DS_PATH = os.path.join(os.path.dirname(__file__), 'resources/scraper/dataSet')
+DS_PATH = os.path.join(os.path.dirname(__file__), 'resources/dataSet')
 SCRAPED_VIDEOS_JSON_NAME = '.scraped_videos_history.json'
 
 
@@ -38,7 +38,7 @@ def test_get_not_yet_scraped_videos():
                                'id': 'p5Iuo2ySCh0',
                                'link': 'https://www.youtube.com/watch?v=p5Iuo2ySCh0',
                                'automatic_captions_lang': True}]
-    r = audioscraper.get_not_yet_scraped_videos(videos_to_scrap, scraped_videos, 1)
+    r = awg.get_not_yet_scraped_videos(videos_to_scrap, scraped_videos, 1)
     assert r == videos_not_yet_scraped
 
 
@@ -82,7 +82,7 @@ def test_generate_audio_words_per_link():
         json.dump(scraped_videos, json_file, sort_keys=True, indent=4, ensure_ascii=False)
 
     # generating audio_words
-    r = audioscraper.generate_audio_words_per_link(link, 'fr', DS_PATH)
+    r = awg.generate_audio_words_per_link(link, 'fr', DS_PATH)
 
     # count audio_words generated, just folders, not files
     folder_names = []

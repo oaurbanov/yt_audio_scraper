@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-from .silence_analyser import find_silences, clean_signal_on_borders
-from .phrase_analyser import get_temptative_cuts
-from .utils import *
+from audioscraper.scraper import silence_analyser as sa
+from audioscraper.scraper import phrase_analyser as pa
+from audioscraper.scraper.utils import *
 
 # samples per second, Not used anymore since librosa killed error
 # SAMPLE_RATE = 22050
@@ -137,13 +137,13 @@ def get_words_cut_indexes_and_signal_phrase(phrase, phrase_timestamps, time_offs
     # 2. extract silences and temptative_cut_indexes
 
     # 2.1. find silences
-    energy_signal, threshold, silences = find_silences(signal_phrase, sample_rate)
+    energy_signal, threshold, silences = sa.find_silences(signal_phrase, sample_rate)
     # 2.2. clean signal_phrase on borders and adjust silences
-    silences, signal_phrase, energy_signal = clean_signal_on_borders(silences, signal_phrase, energy_signal)
+    silences, signal_phrase, energy_signal = sa.clean_signal_on_borders(silences, signal_phrase, energy_signal)
     print("Silences: ", len(silences), ", ", silences)
 
     # 2.3. extract temptative cut_indexes regarding size of each word
-    temptative_cut_indexes = get_temptative_cuts(phrase, signal_phrase)
+    temptative_cut_indexes = pa.get_temptative_cuts(phrase, signal_phrase)
     print("Temptative_cut_indexes: ", len(temptative_cut_indexes), ", ", temptative_cut_indexes)
 
     # Plot this to understand part 3. of the code

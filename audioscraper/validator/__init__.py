@@ -1,1 +1,5 @@
-from .validator import recognize_audio_file
+__all__ = [
+    'validator'
+]
+
+# from .validator import recognize_audio_file

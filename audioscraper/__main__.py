@@ -2,10 +2,10 @@
 import sys
 import getopt
 
-from audioscraper import scraper
+from audioscraper.scraper import audio_words_generator as awg
 
 
-def main(argv):
+def console_entry_point(argv):
     link = ''
     lang = ''
     ds_path = ''
@@ -25,8 +25,8 @@ def main(argv):
         elif opt in ("-o", "--ds_path"):
             ds_path = arg
 
-    scraper.generate_audio_words_per_link(link, lang, ds_path)
+    awg.generate_audio_words_per_link(link, lang, ds_path)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    console_entry_point(sys.argv[1:])
